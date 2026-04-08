@@ -1,0 +1,20 @@
+{
+	"name": "Dealership Content Reel",
+	"id": "dealership-content-reel",
+	"api": "1.0.0",
+	"main": "code.js",
+	"ui": "ui.html",
+	"capabilities": [],
+	"enableProposedApi": false,
+	"editorType": ["figma"],
+	"networkAccess": {
+		"allowedDomains": [
+			"https://raw.githubusercontent.com",
+			"https://gravatar.com",
+			"https://0.gravatar.com",
+			"https://1.gravatar.com",
+			"https://2.gravatar.com",
+			"https://www.gravatar.com"
+		]
+	}
+}

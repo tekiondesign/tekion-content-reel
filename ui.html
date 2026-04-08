@@ -1,0 +1,1150 @@
+<!doctype html>
+<html>
+	<head>
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+			body {
+				font-family:
+					Inter,
+					-apple-system,
+					BlinkMacSystemFont,
+					sans-serif;
+				font-size: 12px;
+				color: #333;
+				background: #fff;
+				height: 100vh;
+				display: flex;
+				flex-direction: column;
+				overflow: hidden;
+			}
+
+			/* ── Tabs ── */
+			.tabs {
+				display: flex;
+				border-bottom: 1px solid #e5e5e5;
+				flex-shrink: 0;
+			}
+			.tab {
+				flex: 1;
+				padding: 10px 4px;
+				text-align: center;
+				cursor: pointer;
+				font-size: 12px;
+				font-weight: 500;
+				color: #999;
+				border-bottom: 2px solid transparent;
+				transition: all 0.15s;
+				user-select: none;
+			}
+			.tab:hover {
+				color: #333;
+			}
+			.tab.active {
+				color: #18a0fb;
+				border-bottom-color: #18a0fb;
+				font-weight: 600;
+			}
+
+			/* ── Loading / Error ── */
+			.loading {
+				padding: 60px 20px;
+				text-align: center;
+				color: #999;
+			}
+			.loading .spinner {
+				display: inline-block;
+				width: 20px;
+				height: 20px;
+				border: 2px solid #ddd;
+				border-top-color: #18a0fb;
+				border-radius: 50%;
+				animation: spin 0.6s linear infinite;
+				margin-bottom: 8px;
+			}
+			@keyframes spin {
+				to {
+					transform: rotate(360deg);
+				}
+			}
+			.error-banner {
+				padding: 10px 12px;
+				background: #fff3f3;
+				color: #cc3333;
+				font-size: 11px;
+				border-bottom: 1px solid #ffdddd;
+			}
+			.retry-btn {
+				background: #18a0fb;
+				color: #fff;
+				border: none;
+				padding: 4px 10px;
+				border-radius: 4px;
+				cursor: pointer;
+				font-size: 11px;
+				margin-left: 8px;
+			}
+
+			/* ── Search ── */
+			.search-bar {
+				padding: 8px 12px;
+				border-bottom: 1px solid #f0f0f0;
+				flex-shrink: 0;
+			}
+			.search-bar input {
+				width: 100%;
+				padding: 7px 10px 7px 30px;
+				border: 1px solid #e0e0e0;
+				border-radius: 6px;
+				font-size: 12px;
+				outline: none;
+				background: #fafafa
+					url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 256 256' fill='%23999'%3E%3Cpath d='M229.66,218.34l-50.07-50.07a88.11,88.11,0,1,0-11.31,11.31l50.07,50.07a8,8,0,0,0,11.31-11.31ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z'/%3E%3C/svg%3E")
+					10px center no-repeat;
+			}
+			.search-bar input:focus {
+				border-color: #18a0fb;
+				background-color: #fff;
+			}
+
+			/* ── Panels ── */
+			.panel {
+				display: none;
+				flex-direction: column;
+				flex: 1;
+				min-height: 0;
+			}
+			.panel.active {
+				display: flex;
+			}
+			.panel-scroll {
+				flex: 1;
+				overflow-y: auto;
+			}
+
+			/* ── Sub-tabs (within panel) ── */
+			.subtabs {
+				display: flex;
+				border-bottom: 1px solid #eee;
+				flex-shrink: 0;
+				padding: 0 12px;
+				gap: 4px;
+			}
+			.subtab {
+				padding: 7px 10px;
+				font-size: 11px;
+				font-weight: 500;
+				cursor: pointer;
+				color: #999;
+				border-bottom: 2px solid transparent;
+				transition: all 0.12s;
+			}
+			.subtab:hover {
+				color: #333;
+			}
+			.subtab.active {
+				color: #18a0fb;
+				border-bottom-color: #18a0fb;
+			}
+
+			/* ── Record card ── */
+			.record-card {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				padding: 8px 12px;
+				border-bottom: 1px solid #f3f3f3;
+				cursor: pointer;
+				transition: background 0.1s;
+			}
+			.record-card:hover {
+				background: #f5f9ff;
+			}
+			.record-avatar {
+				width: 36px;
+				height: 36px;
+				border-radius: 50%;
+				flex-shrink: 0;
+				background: #e0e0e0;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 13px;
+				font-weight: 700;
+				color: #fff;
+				overflow: hidden;
+			}
+			.record-avatar img {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+			}
+			.record-info {
+				flex: 1;
+				min-width: 0;
+			}
+			.record-name {
+				font-weight: 600;
+				font-size: 12px;
+				color: #222;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+			.record-meta {
+				font-size: 10px;
+				color: #999;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+
+			/* ── Field pills (inside expanded card) ── */
+			.record-fields {
+				padding: 4px 12px 8px 58px;
+				display: flex;
+				flex-wrap: wrap;
+				gap: 4px;
+			}
+			.field-pill {
+				padding: 3px 8px;
+				border-radius: 4px;
+				border: 1px solid #e0e0e0;
+				font-size: 10px;
+				cursor: pointer;
+				background: #fafafa;
+				color: #555;
+				transition: all 0.1s;
+				max-width: 200px;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+			.field-pill:hover {
+				background: #18a0fb;
+				color: #fff;
+				border-color: #18a0fb;
+			}
+			.field-pill .pill-label {
+				color: #aaa;
+				margin-right: 3px;
+			}
+			.field-pill:hover .pill-label {
+				color: rgba(255, 255, 255, 0.7);
+			}
+
+			/* ── Service row ── */
+			.service-row {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 8px 12px;
+				border-bottom: 1px solid #f3f3f3;
+				cursor: pointer;
+				transition: background 0.1s;
+			}
+			.service-row:hover {
+				background: #f5f9ff;
+			}
+			.svc-name {
+				font-size: 12px;
+				color: #333;
+			}
+			.svc-price {
+				font-size: 12px;
+				font-weight: 600;
+				color: #18a0fb;
+			}
+			.svc-cat {
+				font-size: 9px;
+				color: #bbb;
+			}
+
+			/* ── Dealership card ── */
+			.dealer-card {
+				padding: 10px 12px;
+				border-bottom: 1px solid #eee;
+				cursor: pointer;
+				transition: background 0.1s;
+			}
+			.dealer-card:hover {
+				background: #f5f9ff;
+			}
+			.dealer-name {
+				font-weight: 600;
+				font-size: 13px;
+				color: #222;
+			}
+			.dealer-meta {
+				font-size: 10px;
+				color: #888;
+				margin-top: 2px;
+			}
+			.dealer-fields {
+				padding: 4px 12px 8px;
+				display: flex;
+				flex-wrap: wrap;
+				gap: 4px;
+			}
+
+			/* ── Section title ── */
+			.section-title {
+				padding: 10px 12px 4px;
+				font-weight: 600;
+				font-size: 10px;
+				color: #aaa;
+				text-transform: uppercase;
+				letter-spacing: 0.6px;
+			}
+
+			/* ── Bottom bar ── */
+			.bottom-bar {
+				padding: 8px 12px;
+				border-top: 1px solid #e5e5e5;
+				background: #fff;
+				display: flex;
+				gap: 8px;
+				flex-shrink: 0;
+				align-items: center;
+			}
+			.shuffle-btn-main {
+				flex: 1;
+				padding: 8px;
+				background: #18a0fb;
+				color: #fff;
+				border: none;
+				border-radius: 6px;
+				font-size: 12px;
+				font-weight: 600;
+				cursor: pointer;
+			}
+			.shuffle-btn-main:hover {
+				background: #0d8de5;
+			}
+
+			/* ── Icon grid ── */
+			.icon-grid {
+				display: grid;
+				grid-template-columns: repeat(6, 1fr);
+				gap: 2px;
+				padding: 8px 12px;
+			}
+			.icon-cell {
+				aspect-ratio: 1;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: 6px;
+				cursor: pointer;
+				transition: all 0.1s;
+				position: relative;
+			}
+			.icon-cell:hover {
+				background: #e8f4fe;
+				transform: scale(1.05);
+			}
+			.icon-cell svg {
+				width: 20px;
+				height: 20px;
+				fill: #333;
+			}
+			.icon-cell .icon-name {
+				display: none;
+				position: absolute;
+				bottom: -18px;
+				left: 50%;
+				transform: translateX(-50%);
+				font-size: 8px;
+				background: #333;
+				color: #fff;
+				padding: 1px 5px;
+				border-radius: 3px;
+				white-space: nowrap;
+				z-index: 5;
+			}
+			.icon-cell:hover .icon-name {
+				display: block;
+			}
+			.icon-cat-label {
+				padding: 8px 12px 4px;
+				font-size: 10px;
+				font-weight: 600;
+				color: #aaa;
+				text-transform: uppercase;
+				letter-spacing: 0.3px;
+			}
+			.weight-bar {
+				padding: 6px 12px;
+				border-bottom: 1px solid #f0f0f0;
+				display: flex;
+				align-items: center;
+				gap: 4px;
+				flex-shrink: 0;
+			}
+			.weight-bar label {
+				font-size: 11px;
+				color: #888;
+				margin-right: 4px;
+			}
+			.weight-chip {
+				padding: 3px 8px;
+				border-radius: 10px;
+				border: 1px solid #ddd;
+				font-size: 10px;
+				cursor: pointer;
+				background: #fff;
+				color: #666;
+				transition: all 0.1s;
+				user-select: none;
+			}
+			.weight-chip:hover {
+				border-color: #18a0fb;
+				color: #18a0fb;
+			}
+			.weight-chip.active {
+				background: #18a0fb;
+				color: #fff;
+				border-color: #18a0fb;
+			}
+
+			.empty-state {
+				padding: 40px 20px;
+				text-align: center;
+				color: #bbb;
+				font-size: 12px;
+			}
+
+			/* ── Source badge ── */
+			.source-bar {
+				padding: 4px 12px;
+				font-size: 9px;
+				color: #ccc;
+				text-align: center;
+				border-top: 1px solid #f0f0f0;
+				flex-shrink: 0;
+			}
+			.source-bar a {
+				color: #18a0fb;
+				text-decoration: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="tabs">
+			<div class="tab active" data-tab="text" onclick="switchTab('text')">
+				Text
+			</div>
+			<div class="tab" data-tab="people" onclick="switchTab('people')">
+				People
+			</div>
+			<div class="tab" data-tab="icon" onclick="switchTab('icon')">Icon</div>
+		</div>
+
+		<!-- ═══════════ TEXT / DATA PANEL ═══════════ -->
+		<div id="panel-text" class="panel active">
+			<div class="subtabs">
+				<div
+					class="subtab active"
+					data-st="services"
+					onclick="setSubTab('services')"
+				>
+					Services
+				</div>
+				<div class="subtab" data-st="vehicles" onclick="setSubTab('vehicles')">
+					Vehicles
+				</div>
+				<div
+					class="subtab"
+					data-st="dealerships"
+					onclick="setSubTab('dealerships')"
+				>
+					Dealerships
+				</div>
+				<div class="subtab" data-st="datetime" onclick="setSubTab('datetime')">
+					Date/Time
+				</div>
+			</div>
+			<div class="search-bar">
+				<input
+					type="text"
+					id="text-search"
+					placeholder="Search..."
+					oninput="renderTextSubTab()"
+				/>
+			</div>
+			<div class="panel-scroll" id="text-content"></div>
+			<div class="bottom-bar">
+				<button class="shuffle-btn-main" onclick="shuffleCurrentTab()">
+					Shuffle apply to selection
+				</button>
+			</div>
+		</div>
+
+		<!-- ═══════════ PEOPLE PANEL ═══════════ -->
+		<div id="panel-people" class="panel">
+			<div class="subtabs">
+				<div
+					class="subtab active"
+					data-pt="employees"
+					onclick="setPeopleTab('employees')"
+				>
+					Employees
+				</div>
+				<div
+					class="subtab"
+					data-pt="customers"
+					onclick="setPeopleTab('customers')"
+				>
+					Customers
+				</div>
+			</div>
+			<div class="search-bar">
+				<input
+					type="text"
+					id="people-search"
+					placeholder="Search people..."
+					oninput="renderPeopleTab()"
+				/>
+			</div>
+			<div class="panel-scroll" id="people-content"></div>
+			<div class="bottom-bar">
+				<button class="shuffle-btn-main" onclick="shufflePeople()">
+					Shuffle names to selection
+				</button>
+			</div>
+		</div>
+
+		<!-- ═══════════ ICON PANEL ═══════════ -->
+		<div id="panel-icon" class="panel">
+			<div class="search-bar">
+				<input
+					type="text"
+					id="icon-search"
+					placeholder="Search Phosphor icons..."
+					oninput="renderIconPanel()"
+				/>
+			</div>
+			<div class="weight-bar">
+				<label>Weight:</label>
+				<span
+					class="weight-chip active"
+					data-w="regular"
+					onclick="setWeight('regular')"
+					>Regular</span
+				>
+				<span class="weight-chip" data-w="bold" onclick="setWeight('bold')"
+					>Bold</span
+				>
+				<span class="weight-chip" data-w="fill" onclick="setWeight('fill')"
+					>Fill</span
+				>
+			</div>
+			<div class="panel-scroll" id="icon-list"></div>
+		</div>
+
+		<div class="source-bar" id="source-bar">
+			Data from <a href="#" id="source-link" target="_blank">GitHub</a> ·
+			<span id="data-version"></span>
+		</div>
+
+		<div id="loading-overlay" class="loading">
+			<div class="spinner"></div>
+			<div>Loading dealership data…</div>
+		</div>
+
+		<script>
+			// ══════════════════════════════════════════════════════════
+			// CONFIG — Change this URL to your GitHub raw file
+			// ══════════════════════════════════════════════════════════
+			const DATA_URL =
+				"https://raw.githubusercontent.com/tekiondesign/tekion-content-reel/main/dealership-data.json";
+
+			// ══════════════════════════════════════════════════════════
+			// STATE
+			// ══════════════════════════════════════════════════════════
+			let DB = null;
+			let currentSubTab = "services";
+			let currentPeopleTab = "employees";
+			let currentWeight = "regular";
+			let expandedRecords = {};
+
+			// ══════════════════════════════════════════════════════════
+			// DATA FETCHING
+			// ══════════════════════════════════════════════════════════
+			async function loadData() {
+				document.getElementById("loading-overlay").style.display = "block";
+				try {
+					const resp = await fetch(DATA_URL);
+					if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+					DB = await resp.json();
+					document.getElementById("loading-overlay").style.display = "none";
+					document.getElementById("data-version").textContent =
+						`v${DB.version} · ${DB.lastUpdated}`;
+					document.getElementById("source-link").href = DATA_URL;
+
+					// Build relational lookups
+					DB._dealerMap = {};
+					DB.dealerships.forEach((d) => (DB._dealerMap[d.id] = d));
+
+					// Compute Gravatar hashes for all people
+					await computeGravatarHashes();
+
+					renderTextSubTab();
+					renderPeopleTab();
+				} catch (e) {
+					document.getElementById("loading-overlay").innerHTML =
+						`<div class="error-banner">Failed to load data: ${e.message}<button class="retry-btn" onclick="loadData()">Retry</button></div>
+       <div style="padding:20px;text-align:center;color:#999;font-size:11px;">
+         Make sure the GitHub URL is correct and the repo is public.<br><br>
+         <strong>Current URL:</strong><br><code style="font-size:10px;word-break:break-all;">${DATA_URL}</code>
+       </div>`;
+				}
+			}
+
+			// ══════════════════════════════════════════════════════════
+			// UTILITIES
+			// ══════════════════════════════════════════════════════════
+			function shuffle(arr) {
+				const a = arr.slice();
+				for (let i = a.length - 1; i > 0; i--) {
+					const j = Math.floor(Math.random() * (i + 1));
+					[a[i], a[j]] = [a[j], a[i]];
+				}
+				return a;
+			}
+
+			function esc(s) {
+				return (s || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
+			}
+			function postMsg(msg) {
+				parent.postMessage({ pluginMessage: msg }, "*");
+			}
+
+			// ── Gravatar: SHA-256 hash via Web Crypto API ──
+			async function sha256(str) {
+				const buf = await crypto.subtle.digest(
+					"SHA-256",
+					new TextEncoder().encode(str),
+				);
+				return Array.from(new Uint8Array(buf))
+					.map((b) => b.toString(16).padStart(2, "0"))
+					.join("");
+			}
+
+			// Gravatar URL from email. Default style: "monsterid" generates unique faces.
+			// Other options: "identicon", "robohash", "wavatar", "retro"
+			const GRAVATAR_DEFAULT = "monsterid";
+			const GRAVATAR_SIZE = 150;
+
+			function gravatarUrl(hash) {
+				return `https://gravatar.com/avatar/${hash}?s=${GRAVATAR_SIZE}&d=${GRAVATAR_DEFAULT}`;
+			}
+
+			// Pre-compute all gravatar hashes once data loads
+			async function computeGravatarHashes() {
+				const allPeople = [...(DB.employees || []), ...(DB.customers || [])];
+				for (const p of allPeople) {
+					const email = (p.avatar_email || p.email || "").trim().toLowerCase();
+					if (email) {
+						p._gravatarHash = await sha256(email);
+						p._gravatarUrl = gravatarUrl(p._gravatarHash);
+					} else {
+						p._gravatarHash = await sha256(p.id);
+						p._gravatarUrl = gravatarUrl(p._gravatarHash);
+					}
+				}
+			}
+
+			function pill(label, value) {
+				if (!value) return "";
+				return `<span class="field-pill" onclick="event.stopPropagation(); postMsg({type:'apply-single-text',value:'${esc(value)}'})">
+    <span class="pill-label">${label}:</span>${value}
+  </span>`;
+			}
+
+			// ══════════════════════════════════════════════════════════
+			// TEXT / DATA TAB
+			// ══════════════════════════════════════════════════════════
+			function setSubTab(st) {
+				currentSubTab = st;
+				document.querySelectorAll(".subtabs .subtab").forEach((t) => {
+					if (t.closest("#panel-text"))
+						t.classList.toggle("active", t.dataset.st === st);
+				});
+				renderTextSubTab();
+			}
+
+			function renderTextSubTab() {
+				if (!DB) return;
+				const q = (
+					document.getElementById("text-search").value || ""
+				).toLowerCase();
+				const container = document.getElementById("text-content");
+
+				if (currentSubTab === "services") renderServices(container, q);
+				else if (currentSubTab === "vehicles") renderVehicles(container, q);
+				else if (currentSubTab === "dealerships")
+					renderDealerships(container, q);
+				else if (currentSubTab === "datetime") renderDateTime(container, q);
+			}
+
+			function renderServices(el, q) {
+				const cats = {};
+				DB.services
+					.filter(
+						(s) =>
+							s.name.toLowerCase().includes(q) ||
+							s.category.toLowerCase().includes(q),
+					)
+					.forEach((s) => {
+						(cats[s.category] = cats[s.category] || []).push(s);
+					});
+
+				let html = "";
+				for (const [cat, svcs] of Object.entries(cats)) {
+					html += `<div class="section-title">${cat}</div>`;
+					svcs.forEach((s) => {
+						html += `<div class="service-row" onclick="postMsg({type:'apply-single-text',value:'${esc(s.name)}'})">
+        <div>
+          <div class="svc-name">${s.name}</div>
+        </div>
+        <div class="svc-price">$${s.price.toFixed(2)}</div>
+      </div>
+      <div class="record-fields">
+        ${pill("Name", s.name)}
+        ${pill("Price", "$" + s.price.toFixed(2))}
+        ${pill("Full", s.name + " - $" + s.price.toFixed(2))}
+      </div>`;
+					});
+				}
+				el.innerHTML =
+					html || '<div class="empty-state">No services found</div>';
+			}
+
+			function renderVehicles(el, q) {
+				const filtered = DB.vehicles.filter((v) =>
+					`${v.year} ${v.make} ${v.model} ${v.vin}`.toLowerCase().includes(q),
+				);
+				let html = "";
+				filtered.forEach((v) => {
+					const dealer = DB._dealerMap[v.dealership_id];
+					const ymm = `${v.year} ${v.make} ${v.model}`;
+					html += `<div class="record-card" onclick="postMsg({type:'apply-single-text',value:'${esc(ymm)}'})">
+      <div style="width:36px;height:36px;border-radius:6px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="18" height="18" viewBox="0 0 256 256" fill="#888"><path d="M240,112H229.2L201.42,49.5A16,16,0,0,0,186.8,40H69.2a16,16,0,0,0-14.62,9.5L26.8,112H16a8,8,0,0,0,0,16h8v80a16,16,0,0,0,16,16H64a16,16,0,0,0,16-16V192h96v16a16,16,0,0,0,16,16h24a16,16,0,0,0,16-16V128h8a8,8,0,0,0,0-16ZM69.2,56H186.8l24.89,56H44.31ZM64,208H40V192H64Zm128,0V192h24v16Zm24-32H40V128H216Z"/></svg>
+      </div>
+      <div class="record-info">
+        <div class="record-name">${ymm}</div>
+        <div class="record-meta">${dealer ? dealer.name : ""} · ${v.vin}</div>
+      </div>
+    </div>
+    <div class="record-fields">
+      ${pill("Year/Make/Model", ymm)}
+      ${pill("VIN", v.vin)}
+      ${pill("Year", String(v.year))}
+      ${pill("Make", v.make)}
+      ${pill("Model", v.model)}
+      ${dealer ? pill("Dealer", dealer.name) : ""}
+    </div>`;
+				});
+				el.innerHTML =
+					html || '<div class="empty-state">No vehicles found</div>';
+			}
+
+			function renderDealerships(el, q) {
+				const filtered = DB.dealerships.filter((d) =>
+					`${d.name} ${d.address} ${d.email}`.toLowerCase().includes(q),
+				);
+				let html = "";
+				filtered.forEach((d) => {
+					html += `<div class="dealer-card" onclick="postMsg({type:'apply-single-text',value:'${esc(d.name)}'})">
+      <div class="dealer-name">${d.name}</div>
+      <div class="dealer-meta">${d.address}</div>
+    </div>
+    <div class="dealer-fields">
+      ${pill("Name", d.name)}
+      ${pill("Address", d.address)}
+      ${pill("Phone", d.phone)}
+      ${pill("Email", d.email)}
+      ${pill("Website", d.website)}
+    </div>`;
+				});
+				el.innerHTML =
+					html || '<div class="empty-state">No dealerships found</div>';
+			}
+
+			function renderDateTime(el, q) {
+				const dt = DB.dateTimeFormats;
+				let html = `<div class="section-title">Date Format: ${dt.date}</div>`;
+				dt.sampleDates
+					.filter((d) => d.includes(q))
+					.forEach((d) => {
+						html += `<div class="service-row" onclick="postMsg({type:'apply-single-text',value:'${d}'})">
+      <span class="svc-name">${d}</span>
+    </div>`;
+					});
+				html += `<div class="section-title">Time Format: ${dt.time}</div>`;
+				dt.sampleTimes
+					.filter((t) => t.includes(q))
+					.forEach((t) => {
+						html += `<div class="service-row" onclick="postMsg({type:'apply-single-text',value:'${t}'})">
+      <span class="svc-name">${t}</span>
+    </div>`;
+					});
+				el.innerHTML = html;
+			}
+
+			function shuffleCurrentTab() {
+				if (!DB) return;
+				let values = [];
+				if (currentSubTab === "services")
+					values = DB.services.map((s) => s.name);
+				else if (currentSubTab === "vehicles")
+					values = DB.vehicles.map((v) => `${v.year} ${v.make} ${v.model}`);
+				else if (currentSubTab === "dealerships")
+					values = DB.dealerships.map((d) => d.name);
+				else if (currentSubTab === "datetime")
+					values = [
+						...DB.dateTimeFormats.sampleDates,
+						...DB.dateTimeFormats.sampleTimes,
+					];
+				postMsg({ type: "apply-random-text", values });
+			}
+
+			// ══════════════════════════════════════════════════════════
+			// PEOPLE TAB
+			// ══════════════════════════════════════════════════════════
+			function setPeopleTab(pt) {
+				currentPeopleTab = pt;
+				document.querySelectorAll("#panel-people .subtab").forEach((t) => {
+					t.classList.toggle("active", t.dataset.pt === pt);
+				});
+				renderPeopleTab();
+			}
+
+			const avatarColors = [
+				"#E06666",
+				"#4A90D9",
+				"#6AA84F",
+				"#F1C232",
+				"#8E7CC3",
+				"#C27BA0",
+				"#76A5AF",
+				"#E69138",
+				"#A64D79",
+				"#674EA7",
+				"#3D85C6",
+				"#CC4400",
+				"#38761D",
+				"#BF9000",
+				"#351C75",
+			];
+
+			function renderPeopleTab() {
+				if (!DB) return;
+				const q = (
+					document.getElementById("people-search").value || ""
+				).toLowerCase();
+				const container = document.getElementById("people-content");
+				const list =
+					currentPeopleTab === "employees" ? DB.employees : DB.customers;
+
+				const filtered = list.filter((p) =>
+					`${p.name} ${p.email} ${p.phone} ${p.designation || ""}`
+						.toLowerCase()
+						.includes(q),
+				);
+
+				let html = "";
+				filtered.forEach((p, i) => {
+					const initials = p.name
+						.split(" ")
+						.map((w) => w[0])
+						.join("");
+					const color = avatarColors[i % avatarColors.length];
+					const dealer = p.dealership_id
+						? DB._dealerMap[p.dealership_id]
+						: null;
+					const meta =
+						[p.designation, dealer?.name].filter(Boolean).join(" · ") ||
+						p.email;
+					const avatarSrc = p._gravatarUrl || gravatarUrl("00000000");
+
+					html += `<div class="record-card" onclick="toggleRecord('${p.id}')">
+      <div class="record-avatar" style="background:${color}">
+        <img src="${avatarSrc}" onerror="this.style.display='none';this.parentNode.textContent='${initials}';" loading="lazy"/>
+      </div>
+      <div class="record-info">
+        <div class="record-name">${p.name}</div>
+        <div class="record-meta">${meta}</div>
+      </div>
+    </div>`;
+
+					// Always show field pills
+					html += `<div class="record-fields">
+      ${pill("Name", p.name)}
+      ${p.designation ? pill("Title", p.designation) : ""}
+      ${pill("Phone", p.phone)}
+      ${pill("Email", p.email)}
+      ${
+				avatarSrc
+					? `<span class="field-pill" onclick="event.stopPropagation(); postMsg({type:'apply-avatar',url:'${esc(avatarSrc)}'})">
+        <span class="pill-label">Avatar:</span>Apply image
+      </span>`
+					: ""
+			}
+      ${dealer ? pill("Dealer", dealer.name) : ""}
+    </div>`;
+				});
+
+				container.innerHTML =
+					html || '<div class="empty-state">No people found</div>';
+			}
+
+			function toggleRecord(id) {
+				expandedRecords[id] = !expandedRecords[id];
+			}
+
+			function shufflePeople() {
+				if (!DB) return;
+				const list =
+					currentPeopleTab === "employees" ? DB.employees : DB.customers;
+				postMsg({ type: "apply-random-text", values: list.map((p) => p.name) });
+			}
+
+			// ══════════════════════════════════════════════════════════
+			// ICON PANEL (Phosphor Icons - embedded SVG paths)
+			// ══════════════════════════════════════════════════════════
+			const phosphorIcons = {
+				"Vehicles & Transport": [
+					{
+						name: "Car",
+						regular:
+							'<path d="M240,112H229.2L201.42,49.5A16,16,0,0,0,186.8,40H69.2a16,16,0,0,0-14.62,9.5L26.8,112H16a8,8,0,0,0,0,16h8v80a16,16,0,0,0,16,16H64a16,16,0,0,0,16-16V192h96v16a16,16,0,0,0,16,16h24a16,16,0,0,0,16-16V128h8a8,8,0,0,0,0-16ZM69.2,56H186.8l24.89,56H44.31ZM64,208H40V192H64Zm128,0V192h24v16Zm24-32H40V128H216ZM56,152a8,8,0,0,1,8-8H80a8,8,0,0,1,0,16H64A8,8,0,0,1,56,152Zm112,0a8,8,0,0,1,8-8h16a8,8,0,0,1,0,16H176A8,8,0,0,1,168,152Z"/>',
+						bold: '<path d="M240,108H228.64L201.25,44.21A20,20,0,0,0,183,32H73a20,20,0,0,0-18.25,12.21L27.36,108H16a12,12,0,0,0,0,24h4v76a20,20,0,0,0,20,20H64a20,20,0,0,0,20-20V196h88v12a20,20,0,0,0,20,20h24a20,20,0,0,0,20-20V132h4a12,12,0,0,0,0-24ZM75.35,56H180.65l22.85,52H52.5ZM60,204H44V196H60Zm136,0V196h16v8Zm16-32H44V132H212Z"/>',
+						fill: '<path d="M240,112H229.2L201.42,49.5A16,16,0,0,0,186.8,40H69.2a16,16,0,0,0-14.62,9.5L26.8,112H16a8,8,0,0,0,0,16h8v80a16,16,0,0,0,16,16H64a16,16,0,0,0,16-16V192h96v16a16,16,0,0,0,16,16h24a16,16,0,0,0,16-16V128h8a8,8,0,0,0,0-16ZM69.2,56H186.8l24.89,56H44.31ZM80,160H64a8,8,0,0,1,0-16H80a8,8,0,0,1,0,16Zm112,0H176a8,8,0,0,1,0-16h16a8,8,0,0,1,0,16Z"/>',
+					},
+					{
+						name: "Truck",
+						regular:
+							'<path d="M255.43,117l-14-35A15.93,15.93,0,0,0,226.57,72H192V64a8,8,0,0,0-8-8H32A16,16,0,0,0,16,72V184a16,16,0,0,0,16,16H49a32,32,0,0,0,62,0h34a32,32,0,0,0,62,0h17a16,16,0,0,0,16-16V120A7.94,7.94,0,0,0,255.43,117ZM192,88h34.57l9.6,24H192ZM80,208a16,16,0,1,1,16-16A16,16,0,0,1,80,208Zm96,0a16,16,0,1,1,16-16A16,16,0,0,1,176,208Z"/>',
+						bold: '<path d="M255.2,115.52l-14-35A19.92,19.92,0,0,0,222.58,68H196V64a12,12,0,0,0-12-12H32A20,20,0,0,0,12,72V184a20,20,0,0,0,20,20H46.06a36,36,0,0,0,67.88,0h28.12a36,36,0,0,0,67.88,0H224a20,20,0,0,0,20-20V120A12.1,12.1,0,0,0,255.2,115.52ZM80,208a12,12,0,1,1,12-12A12,12,0,0,1,80,208Zm96,0a12,12,0,1,1,12-12A12,12,0,0,1,176,208Z"/>',
+						fill: '<path d="M255.43,117l-14-35A15.93,15.93,0,0,0,226.57,72H192V64a8,8,0,0,0-8-8H32A16,16,0,0,0,16,72V184a16,16,0,0,0,16,16H49a32,32,0,0,0,62,0h34a32,32,0,0,0,62,0h17a16,16,0,0,0,16-16V120A7.94,7.94,0,0,0,255.43,117ZM80,208a16,16,0,1,1,16-16A16,16,0,0,1,80,208Zm96,0a16,16,0,1,1,16-16A16,16,0,0,1,176,208Zm16-80V88h34.57l9.6,24Z"/>',
+					},
+					{
+						name: "Gas Pump",
+						regular:
+							'<path d="M241,69.66,221.66,50.34a8,8,0,0,0-11.32,11.32L229.66,81A8,8,0,0,1,232,86.63V168a8,8,0,0,1-16,0V128a24,24,0,0,0-24-24H176V56a24,24,0,0,0-24-24H72A24,24,0,0,0,48,56V208H32a8,8,0,0,0,0,16H192a8,8,0,0,0,0-16H176V120h16a8,8,0,0,1,8,8v40a24,24,0,0,0,48,0V86.63A23.85,23.85,0,0,0,241,69.66ZM64,56a8,8,0,0,1,8-8h80a8,8,0,0,1,8,8v72H64Zm96,152H64V144h96Z"/>',
+						bold: '<path d="M243.53,68.19,225.66,50.34a12,12,0,0,0-17,17L226.83,85.5a4,4,0,0,1,1.17,2.83V160a4,4,0,0,1-8,0V128a28,28,0,0,0-28-28H180V56a28,28,0,0,0-28-28H72A28,28,0,0,0,44,56V204H32a12,12,0,0,0,0,24H192a12,12,0,0,0,0-24H180V124h12a4,4,0,0,1,4,4v32a28,28,0,0,0,56,0V88.33A27.81,27.81,0,0,0,243.53,68.19Z"/>',
+						fill: '<path d="M241,69.66,221.66,50.34a8,8,0,0,0-11.32,11.32L229.66,81A8,8,0,0,1,232,86.63V168a8,8,0,0,1-16,0V128a24,24,0,0,0-24-24H176V56a24,24,0,0,0-24-24H72A24,24,0,0,0,48,56V208H32a8,8,0,0,0,0,16H192a8,8,0,0,0,0-16H176V120h16a8,8,0,0,1,8,8v40a24,24,0,0,0,48,0V86.63A23.85,23.85,0,0,0,241,69.66ZM160,128H64V56a8,8,0,0,1,8-8h80a8,8,0,0,1,8,8Z"/>',
+					},
+				],
+				People: [
+					{
+						name: "User",
+						regular:
+							'<path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/>',
+						bold: '<path d="M234.38,210a123.36,123.36,0,0,0-60.78-53.23,76,76,0,1,0-91.2,0A123.36,123.36,0,0,0,21.62,210a12,12,0,0,0,20.77,12c18.12-31.32,50.12-50,85.61-50s67.49,18.69,85.61,50a12,12,0,0,0,20.77-12ZM76,96a52,52,0,1,1,52,52A52.06,52.06,0,0,1,76,96Z"/>',
+						fill: '<path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8Z"/>',
+					},
+					{
+						name: "Users",
+						regular:
+							'<path d="M117.25,157.92a60,60,0,1,0-66.5,0A95.83,95.83,0,0,0,3.53,195.63a8,8,0,1,0,13.4,8.74,80,80,0,0,1,134.14,0,8,8,0,0,0,13.4-8.74A95.83,95.83,0,0,0,117.25,157.92ZM40,108a44,44,0,1,1,44,44A44.05,44.05,0,0,1,40,108Zm210.14,98.7a8,8,0,0,1-11.07-2.33A79.83,79.83,0,0,0,172,168a8,8,0,0,1,0-16,44,44,0,1,0-16.34-84.87,8,8,0,1,1-5.94-14.85,60,60,0,0,1,49.53,105.64,95.83,95.83,0,0,1,47.22,37.71A8,8,0,0,1,250.14,206.7Z"/>',
+						bold: '<path d="M125.18,156.94a64,64,0,1,0-82.36,0,100.23,100.23,0,0,0-39.49,32,12,12,0,0,0,19.35,14.18,76,76,0,0,1,122.64,0,12,12,0,0,0,19.36-14.18A100.33,100.33,0,0,0,125.18,156.94ZM44,108a40,40,0,1,1,40,40A40,40,0,0,1,44,108Z"/>',
+						fill: '<path d="M117.25,157.92a60,60,0,1,0-66.5,0A95.83,95.83,0,0,0,3.53,195.63a8,8,0,1,0,13.4,8.74,80,80,0,0,1,134.14,0,8,8,0,0,0,13.4-8.74A95.83,95.83,0,0,0,117.25,157.92Z"/>',
+					},
+					{
+						name: "Phone",
+						regular:
+							'<path d="M222.37,158.46l-47.11-21.11-.13-.06a16,16,0,0,0-15.17,1.4,8.12,8.12,0,0,0-.75.56L134.87,160c-15.42-7.49-31.34-23.29-38.83-38.51l20.78-24.71c.2-.25.39-.5.57-.77a16,16,0,0,0,1.32-15.06l0-.12L97.54,33.64a16,16,0,0,0-16.62-9.52A56.26,56.26,0,0,0,32,80c0,79.4,64.6,144,144,144a56.26,56.26,0,0,0,55.88-48.92A16,16,0,0,0,222.37,158.46Z"/>',
+						bold: '<path d="M224.07,156.44l-46.93-21-.13-.06a20,20,0,0,0-19,1.75c-.18.13-.36.27-.53.42l-24.68,22c-12.87-6.76-26.22-19.85-33-32.63l22-25.12c.15-.17.3-.35.44-.54a20,20,0,0,0,1.6-18.77l0-.11-21-47.05A20,20,0,0,0,82.08,23.9,60.27,60.27,0,0,0,28,80c0,81.61,66.39,148,148,148a60.27,60.27,0,0,0,56.1-54.08A20,20,0,0,0,224.07,156.44Z"/>',
+						fill: '<path d="M231.88,175.08A56.26,56.26,0,0,1,176,224C96.6,224,32,159.4,32,80A56.26,56.26,0,0,1,80.92,24.12a16,16,0,0,1,16.62,9.52l21,47,.12.12a16,16,0,0,1-1.27,15.09c-.18.27-.37.52-.57.77L96,121.41c7.49,15.22,23.41,31,38.83,38.51l24.34-20.71a8.12,8.12,0,0,1,.75-.56,16,16,0,0,1,15.17-1.4l.13.06,47.11,21.11A16,16,0,0,1,231.88,175.08Z"/>',
+					},
+					{
+						name: "Envelope",
+						regular:
+							'<path d="M224,48H32a8,8,0,0,0-8,8V192a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A8,8,0,0,0,224,48Zm-96,85.15L52.57,64H203.43ZM98.71,128,40,181.81V74.19Zm11.84,10.85,12,11.05a8,8,0,0,0,10.82,0l12-11.05,58,53.15H52.57ZM157.29,128,216,74.19V181.81Z"/>',
+						bold: '<path d="M224,44H32A12,12,0,0,0,20,56V192a20,20,0,0,0,20,20H216a20,20,0,0,0,20-20V56A12,12,0,0,0,224,44ZM128,149.31,57.34,68H198.66Z"/>',
+						fill: '<path d="M224,48H32a8,8,0,0,0-8,8V192a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A8,8,0,0,0,224,48ZM98.71,128,40,181.81V74.19Zm11.84,10.85,12,11.05a8,8,0,0,0,10.82,0l12-11.05,58,53.15H52.57ZM157.29,128,216,74.19V181.81Z"/>',
+					},
+				],
+				Commerce: [
+					{
+						name: "Currency Dollar",
+						regular:
+							'<path d="M152,120H136V56h8a32,32,0,0,1,32,32,8,8,0,0,0,16,0,48.05,48.05,0,0,0-48-48h-8V24a8,8,0,0,0-16,0V40h-8a48,48,0,0,0,0,96h8v64H104a32,32,0,0,1-32-32,8,8,0,0,0-16,0,48.05,48.05,0,0,0,48,48h16v16a8,8,0,0,0,16,0V216h16a48,48,0,0,0,0-96Zm-40,0a32,32,0,0,1,0-64h8v64Zm40,80H136V136h16a32,32,0,0,1,0,64Z"/>',
+						bold: '<path d="M152,120H140V52h4a28,28,0,0,1,28,28,12,12,0,0,0,24,0,52.06,52.06,0,0,0-52-52h-4V16a12,12,0,0,0-24,0V28h-4a52,52,0,0,0,0,104h4v68H108a28,28,0,0,1-28-28,12,12,0,0,0-24,0,52.06,52.06,0,0,0,52,52h8v12a12,12,0,0,0,24,0V224h12a52,52,0,0,0,0-104Z"/>',
+						fill: '<path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm12,152H132v8a8,8,0,0,1-16,0v-8H104a8,8,0,0,1,0-16h36a12,12,0,0,0,0-24H116a28,28,0,0,1,0-56h0V72a8,8,0,0,1,16,0v8h12a8,8,0,0,1,0,16H108a12,12,0,0,0,0,24h28a28,28,0,0,1,4,55.72Z"/>',
+					},
+					{
+						name: "Credit Card",
+						regular:
+							'<path d="M224,48H32A16,16,0,0,0,16,64V192a16,16,0,0,0,16,16H224a16,16,0,0,0,16-16V64A16,16,0,0,0,224,48Zm0,16V88H32V64Zm0,128H32V104H224v88Z"/>',
+						bold: '<path d="M224,44H32A20,20,0,0,0,12,64V192a20,20,0,0,0,20,20H224a20,20,0,0,0,20-20V64A20,20,0,0,0,224,44Zm-4,24V84H36V68ZM36,188V108H220v80Z"/>',
+						fill: '<path d="M224,48H32A16,16,0,0,0,16,64V192a16,16,0,0,0,16,16H224a16,16,0,0,0,16-16V64A16,16,0,0,0,224,48ZM32,88V64H224V88Z"/>',
+					},
+					{
+						name: "Receipt",
+						regular:
+							'<path d="M200,24H56A16,16,0,0,0,40,40V216a8,8,0,0,0,11.58,7.15L80,208.94l28.42,14.21a8,8,0,0,0,7.16,0L144,208.94l28.42,14.21a8,8,0,0,0,7.16,0L208,208.94l28.42,14.21A8,8,0,0,0,216,216V40A16,16,0,0,0,200,24ZM64,76a8,8,0,0,1,8-8H184a8,8,0,0,1,0,16H72A8,8,0,0,1,64,76Zm0,40a8,8,0,0,1,8-8H184a8,8,0,0,1,0,16H72A8,8,0,0,1,64,116Zm0,40a8,8,0,0,1,8-8H184a8,8,0,0,1,0,16H72A8,8,0,0,1,64,156Z"/>',
+						bold: '<path d="M200,20H56A20,20,0,0,0,36,40V216a12,12,0,0,0,17.37,10.73L80,213.42l26.63,13.31a12,12,0,0,0,10.74,0L144,213.42l26.63,13.31a12,12,0,0,0,10.74,0L208,213.42l26.63,13.31A12,12,0,0,0,220,216V40A20,20,0,0,0,200,20Z"/>',
+						fill: '<path d="M200,24H56A16,16,0,0,0,40,40V216a8,8,0,0,0,11.58,7.15L80,208.94l28.42,14.21a8,8,0,0,0,7.16,0L144,208.94l28.42,14.21a8,8,0,0,0,7.16,0L208,208.94l28.42,14.21A8,8,0,0,0,216,216V40A16,16,0,0,0,200,24ZM184,164H72a8,8,0,0,1,0-16H184a8,8,0,0,1,0,16Zm0-40H72a8,8,0,0,1,0-16H184a8,8,0,0,1,0,16Zm0-40H72a8,8,0,0,1,0-16H184a8,8,0,0,1,0,16Z"/>',
+					},
+					{
+						name: "Tag",
+						regular:
+							'<path d="M243.31,136,144,36.69A15.86,15.86,0,0,0,132.69,32H40a8,8,0,0,0-8,8v92.69A15.86,15.86,0,0,0,36.69,144L136,243.31a16,16,0,0,0,22.63,0l84.68-84.68a16,16,0,0,0,0-22.63ZM96,84A12,12,0,1,1,84,72,12,12,0,0,1,96,84Z"/>',
+						bold: '<path d="M246.15,133.18,146.83,33.86A19.85,19.85,0,0,0,132.69,28H40A12,12,0,0,0,28,40v92.69a19.85,19.85,0,0,0,5.86,14.14l99.32,99.32a20,20,0,0,0,28.28,0l84.69-84.69A20,20,0,0,0,246.15,133.18ZM100,84A16,16,0,1,1,84,68,16,16,0,0,1,100,84Z"/>',
+						fill: '<path d="M243.31,136,144,36.69A15.86,15.86,0,0,0,132.69,32H40a8,8,0,0,0-8,8v92.69A15.86,15.86,0,0,0,36.69,144L136,243.31a16,16,0,0,0,22.63,0l84.68-84.68a16,16,0,0,0,0-22.63ZM84,96A12,12,0,1,1,96,84,12,12,0,0,1,84,96Z"/>',
+					},
+				],
+				"Tools & Service": [
+					{
+						name: "Wrench",
+						regular:
+							'<path d="M226.76,69a8,8,0,0,0-12.84-2.88l-40.3,37.19-17.23-3.7-3.7-17.23,37.19-40.3A8,8,0,0,0,187,29.24,72,72,0,0,0,88,96c0,1.29,0,2.57.08,3.85L29.66,146.2a40,40,0,1,0,56.14,56.14L132.15,143.9c1.28.06,2.56.1,3.85.1A72,72,0,0,0,226.76,69Z"/>',
+						bold: '<path d="M228.54,68a12,12,0,0,0-19.27-4.32l-37.6,34.72-10.14-2.18-2.18-10.14,34.72-37.6A12,12,0,0,0,189.75,29.2,76,76,0,0,0,85.56,96.83L31.83,144.1a44,44,0,1,0,62.07,62.07l47.27-53.73A76,76,0,0,0,228.54,68Z"/>',
+						fill: '<path d="M226.76,69a8,8,0,0,0-12.84-2.88l-40.3,37.19-17.23-3.7-3.7-17.23,37.19-40.3A8,8,0,0,0,187,29.24,72,72,0,0,0,88,96c0,1.29,0,2.57.08,3.85L29.66,146.2a40,40,0,1,0,56.14,56.14L132.15,143.9c1.28.06,2.56.1,3.85.1A72,72,0,0,0,226.76,69Z"/>',
+					},
+					{
+						name: "Shield Check",
+						regular:
+							'<path d="M208,40H48A16,16,0,0,0,32,56v58.77c0,89.61,75.82,119.34,91,124.39a15.53,15.53,0,0,0,10,0c15.2-5.05,91-34.78,91-124.39V56A16,16,0,0,0,208,40ZM82.34,141.66a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32l-56,56a8,8,0,0,1-11.32,0Z"/>',
+						bold: '<path d="M208,36H48A20,20,0,0,0,28,56v58.77c0,92.38,78.13,123,93.76,128.22a19.6,19.6,0,0,0,12.48,0C149.87,237.77,228,207.15,228,114.79V56A20,20,0,0,0,208,36ZM85.17,140.83a12,12,0,0,1,17-17L112,133.66l41.83-41.83a12,12,0,0,1,17,17l-50.34,50.34a12,12,0,0,1-17,0Z"/>',
+						fill: '<path d="M208,40H48A16,16,0,0,0,32,56v58.77c0,89.61,75.82,119.34,91,124.39a15.53,15.53,0,0,0,10,0c15.2-5.05,91-34.78,91-124.39V56A16,16,0,0,0,208,40Zm-34.34,69.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/>',
+					},
+					{
+						name: "Clipboard",
+						regular:
+							'<path d="M200,32H163.74a47.92,47.92,0,0,0-71.48,0H56A16,16,0,0,0,40,48V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V48A16,16,0,0,0,200,32ZM96,136h64a8,8,0,0,1,0,16H96a8,8,0,0,1,0-16Zm0,32h64a8,8,0,0,1,0,16H96a8,8,0,0,1,0-16Z"/>',
+						bold: '<path d="M200,28H163.74a47.93,47.93,0,0,0-71.48,0H56A20,20,0,0,0,36,48V216a20,20,0,0,0,20,20H200a20,20,0,0,0,20-20V48A20,20,0,0,0,200,28Z"/>',
+						fill: '<path d="M200,32H163.74a47.92,47.92,0,0,0-71.48,0H56A16,16,0,0,0,40,48V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V48A16,16,0,0,0,200,32ZM96,176a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Zm0-32a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Z"/>',
+					},
+				],
+				"General UI": [
+					{
+						name: "Calendar",
+						regular:
+							'<path d="M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32Z"/>',
+						bold: '<path d="M208,28H188V24a12,12,0,0,0-24,0v4H92V24a12,12,0,0,0-24,0v4H48A20,20,0,0,0,28,48V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V48A20,20,0,0,0,208,28Z"/>',
+						fill: '<path d="M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM48,80H208V208H48Z"/>',
+					},
+					{
+						name: "Clock",
+						regular:
+							'<path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm64-88a8,8,0,0,1-8,8H128a8,8,0,0,1-8-8V72a8,8,0,0,1,16,0v48h48A8,8,0,0,1,192,128Z"/>',
+						bold: '<path d="M128,20A108,108,0,1,0,236,128,108.12,108.12,0,0,0,128,20Zm0,192a84,84,0,1,1,84-84A84.09,84.09,0,0,1,128,212Z"/>',
+						fill: '<path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm56,112H128a8,8,0,0,1-8-8V72a8,8,0,0,1,16,0v48h48a8,8,0,0,1,0,16Z"/>',
+					},
+					{
+						name: "Star",
+						regular:
+							'<path d="M234.29,114.85l-45,38.83L203,211.75a16.4,16.4,0,0,1-24.5,17.82L128,198.49,77.47,229.57A16.4,16.4,0,0,1,53,211.75l13.76-58.07-45-38.83A16.46,16.46,0,0,1,31.08,96l59-5.13L111.43,36.2a16.41,16.41,0,0,1,33.14,0L165.93,90.9l59,5.13a16.46,16.46,0,0,1,9.37,18.82Z"/>',
+						bold: '<path d="M243,96.05a20,20,0,0,0-17.26-13.72l-57-4.93-22.3-53.14a20,20,0,0,0-36.82,0L87.29,77.4l-57,4.93A20,20,0,0,0,18.87,113l43.07,37.31L50.28,206.89A20,20,0,0,0,80.1,228.43L128,199l47.9,29.44a20,20,0,0,0,29.82-21.54l-11.66-56.55L237.13,113A20,20,0,0,0,243,96.05Z"/>',
+						fill: '<path d="M234.29,114.85l-45,38.83L203,211.75a16.4,16.4,0,0,1-24.5,17.82L128,198.49,77.47,229.57A16.4,16.4,0,0,1,53,211.75l13.76-58.07-45-38.83A16.46,16.46,0,0,1,31.08,96l59-5.13L111.43,36.2a16.41,16.41,0,0,1,33.14,0L165.93,90.9l59,5.13a16.46,16.46,0,0,1,9.37,18.82Z"/>',
+					},
+					{
+						name: "Map Pin",
+						regular:
+							'<path d="M128,16a88.1,88.1,0,0,0-88,88c0,75.3,80,132.17,83.41,134.55a8,8,0,0,0,9.18,0C136,236.17,216,179.3,216,104A88.1,88.1,0,0,0,128,16Zm0,120a32,32,0,1,1,32-32A32,32,0,0,1,128,136Z"/>',
+						bold: '<path d="M128,12a92.1,92.1,0,0,0-92,92c0,77.36,81.64,135.4,85.12,137.83a12,12,0,0,0,13.76,0C138.36,239.4,220,181.36,220,104A92.1,92.1,0,0,0,128,12Zm0,80a28,28,0,1,1,28,28A28,28,0,0,1,128,92Z"/>',
+						fill: '<path d="M128,16a88.1,88.1,0,0,0-88,88c0,75.3,80,132.17,83.41,134.55a8,8,0,0,0,9.18,0C136,236.17,216,179.3,216,104A88.1,88.1,0,0,0,128,16Zm0,120a32,32,0,1,1,32-32A32,32,0,0,1,128,136Z"/>',
+					},
+					{
+						name: "Check Circle",
+						regular:
+							'<path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/>',
+						bold: '<path d="M176.49,95.51a12,12,0,0,1,0,17l-56,56a12,12,0,0,1-17,0l-24-24a12,12,0,1,1,17-17L112,143l47.51-47.52A12,12,0,0,1,176.49,95.51Z"/>',
+						fill: '<path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/>',
+					},
+					{
+						name: "Magnifying Glass",
+						regular:
+							'<path d="M229.66,218.34l-50.07-50.07a88.11,88.11,0,1,0-11.31,11.31l50.07,50.07a8,8,0,0,0,11.31-11.31ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"/>',
+						bold: '<path d="M232.49,215.51,185,168a92.12,92.12,0,1,0-17,17l47.53,47.53a12,12,0,0,0,17-17ZM44,112a68,68,0,1,1,68,68A68.07,68.07,0,0,1,44,112Z"/>',
+						fill: '<path d="M168,112a56,56,0,1,1-56-56A56.06,56.06,0,0,1,168,112Zm61.66,117.66a8,8,0,0,1-11.32,0l-50.07-50.07a88.11,88.11,0,1,1,11.31-11.31l50.07,50.07A8,8,0,0,1,229.66,229.66Z"/>',
+					},
+					{
+						name: "File Text",
+						regular:
+							'<path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34Z"/>',
+						bold: '<path d="M216.49,79.52l-56-56A12,12,0,0,0,152,20H56A20,20,0,0,0,36,40V216a20,20,0,0,0,20,20H200a20,20,0,0,0,20-20V88A12,12,0,0,0,216.49,79.52Z"/>',
+						fill: '<path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,176H96a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Zm0-32H96a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Zm-8-56V44l44,44Z"/>',
+					},
+					{
+						name: "Key",
+						regular:
+							'<path d="M216.57,39.43A80,80,0,0,0,83.91,120.78L28.69,176A15.86,15.86,0,0,0,24,187.31V216a16,16,0,0,0,16,16H72a8,8,0,0,0,8-8V208H96a8,8,0,0,0,8-8V184h16a8,8,0,0,0,5.66-2.34l9.56-9.57A80,80,0,0,0,216.57,39.43ZM180,92a16,16,0,1,1,16-16A16,16,0,0,1,180,92Z"/>',
+						bold: '<path d="M218.83,37.17a84,84,0,0,0-130,104.46L30.83,199.63a20,20,0,0,0-6.83,15V224a20,20,0,0,0,20,20H68a12,12,0,0,0,12-12V216H96a12,12,0,0,0,12-12V188h16a12,12,0,0,0,8.49-3.51l6.08-6.08A84,84,0,0,0,218.83,37.17ZM196,100a28,28,0,1,1-28-28A28,28,0,0,1,196,100Z"/>',
+						fill: '<path d="M216.57,39.43A80,80,0,0,0,83.91,120.78L28.69,176A15.86,15.86,0,0,0,24,187.31V216a16,16,0,0,0,16,16H72a8,8,0,0,0,8-8V208H96a8,8,0,0,0,8-8V184h16a8,8,0,0,0,5.66-2.34l9.56-9.57A80,80,0,0,0,216.57,39.43ZM180,92a16,16,0,1,1,16-16A16,16,0,0,1,180,92Z"/>',
+					},
+				],
+			};
+
+			function setWeight(w) {
+				currentWeight = w;
+				document
+					.querySelectorAll(".weight-chip")
+					.forEach((c) => c.classList.toggle("active", c.dataset.w === w));
+				renderIconPanel();
+			}
+
+			function renderIconPanel() {
+				const container = document.getElementById("icon-list");
+				const search = (
+					document.getElementById("icon-search")?.value || ""
+				).toLowerCase();
+				let html = "";
+				for (const [cat, icons] of Object.entries(phosphorIcons)) {
+					const filtered = icons.filter((ic) =>
+						ic.name.toLowerCase().includes(search),
+					);
+					if (filtered.length === 0) continue;
+					html += `<div class="icon-cat-label">${cat}</div><div class="icon-grid">`;
+					filtered.forEach((ic) => {
+						const pathData = ic[currentWeight] || ic.regular;
+						const fullSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor">${pathData}</svg>`;
+						html += `<div class="icon-cell" title="${ic.name}" onclick='applyIcon(${JSON.stringify(fullSvg)})'>
+        <svg viewBox="0 0 256 256" fill="currentColor">${pathData}</svg>
+        <span class="icon-name">${ic.name}</span>
+      </div>`;
+					});
+					html += `</div>`;
+				}
+				container.innerHTML =
+					html || '<div class="empty-state">No icons found</div>';
+			}
+
+			function applyIcon(svg) {
+				postMsg({ type: "apply-icon", svg });
+			}
+
+			// ══════════════════════════════════════════════════════════
+			// TAB SWITCHING
+			// ══════════════════════════════════════════════════════════
+			function switchTab(tab) {
+				document
+					.querySelectorAll(".tabs > .tab")
+					.forEach((t) => t.classList.remove("active"));
+				document
+					.querySelector(`.tabs > .tab[data-tab="${tab}"]`)
+					.classList.add("active");
+				document
+					.querySelectorAll(".panel")
+					.forEach((p) => p.classList.remove("active"));
+				document.getElementById(`panel-${tab}`).classList.add("active");
+				if (tab === "people") renderPeopleTab();
+				if (tab === "icon") renderIconPanel();
+			}
+
+			// ══════════════════════════════════════════════════════════
+			// INIT
+			// ══════════════════════════════════════════════════════════
+			loadData();
+		</script>
+	</body>
+</html>

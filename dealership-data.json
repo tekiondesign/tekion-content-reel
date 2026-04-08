@@ -1,0 +1,475 @@
+{
+	"version": "1.0.0",
+	"lastUpdated": "2026-04-08",
+
+	"dealerships": [
+		{
+			"id": "dlr_001",
+			"name": "Tachyon Motors",
+			"address": "1200 Auto Mall Pkwy, Pleasanton, CA 94588",
+			"phone": "+1 (555) 755-2000",
+			"email": "info@tachyonmotors.com",
+			"website": "https://tachyonmotors.com"
+		},
+		{
+			"id": "dlr_002",
+			"name": "Innovation Motors",
+			"address": "850 Innovation Dr, San Jose, CA 95134",
+			"phone": "+1 (555) 432-1000",
+			"email": "info@innovationmotors.com",
+			"website": "https://innovationmotors.com"
+		},
+		{
+			"id": "dlr_003",
+			"name": "Pleasanton Motors",
+			"address": "4500 Hopyard Rd, Pleasanton, CA 94566",
+			"phone": "+1 (555) 468-3200",
+			"email": "sales@pleasantonmotors.com",
+			"website": "https://pleasantonmotors.com"
+		},
+		{
+			"id": "dlr_004",
+			"name": "Cinnci Motors",
+			"address": "7720 Montgomery Rd, Cincinnati, OH 45236",
+			"phone": "+1 (555) 891-4400",
+			"email": "hello@cinncimotors.com",
+			"website": "https://cinncimotors.com"
+		},
+		{
+			"id": "dlr_005",
+			"name": "Nebula Motors",
+			"address": "320 Galaxy Blvd, Austin, TX 78701",
+			"phone": "+1 (555) 209-7700",
+			"email": "contact@nebulamotors.com",
+			"website": "https://nebulamotors.com"
+		},
+		{
+			"id": "dlr_006",
+			"name": "Lunar Automotive",
+			"address": "1500 Crescent Ave, Palo Alto, CA 94301",
+			"phone": "+1 (555) 617-3300",
+			"email": "info@lunarautomotive.com",
+			"website": "https://lunarautomotive.com"
+		},
+		{
+			"id": "dlr_007",
+			"name": "Tekion EV",
+			"address": "990 Electric Way, Fremont, CA 94538",
+			"phone": "+1 (555) 782-5500",
+			"email": "support@tekionev.com",
+			"website": "https://tekionev.com"
+		},
+		{
+			"id": "dlr_008",
+			"name": "Solarion",
+			"address": "2200 Solar Park Dr, Phoenix, AZ 85004",
+			"phone": "+1 (555) 344-8800",
+			"email": "hello@solarion.com",
+			"website": "https://solarion.com"
+		},
+		{
+			"id": "dlr_009",
+			"name": "Eventa Motors",
+			"address": "600 Horizon St, Denver, CO 80202",
+			"phone": "+1 (555) 903-1100",
+			"email": "info@eventamotors.com",
+			"website": "https://eventamotors.com"
+		}
+	],
+
+	"employees": [
+		{
+			"id": "emp_001",
+			"dealership_id": "dlr_001",
+			"name": "William Florez",
+			"designation": "General Manager",
+			"phone": "+1 (555) 755-2099",
+			"email": "w.florez@tachyonmotors.com",
+			"avatar_email": "w.florez@tachyonmotors.com"
+		},
+		{
+			"id": "emp_002",
+			"dealership_id": "dlr_001",
+			"name": "Celine Morris",
+			"designation": "Sales Manager",
+			"phone": "+1 (775) 555-8569",
+			"email": "c.morris@tachyonmotors.com",
+			"avatar_email": "c.morris@tachyonmotors.com"
+		},
+		{
+			"id": "emp_003",
+			"dealership_id": "dlr_001",
+			"name": "Mario McSriff",
+			"designation": "Finance Manager",
+			"phone": "+1 (555) 755-4646",
+			"email": "m.mcsriff@tachyonmotors.com",
+			"avatar_email": "m.mcsriff@tachyonmotors.com"
+		},
+		{
+			"id": "emp_004",
+			"dealership_id": "dlr_001",
+			"name": "Mike Truk",
+			"designation": "Service Advisor",
+			"phone": "+1 (555) 755-2102",
+			"email": "m.truk@tachyonmotors.com",
+			"avatar_email": "m.truk@tachyonmotors.com"
+		},
+		{
+			"id": "emp_005",
+			"dealership_id": "dlr_001",
+			"name": "Raynta Adams",
+			"designation": "Sales Consultant",
+			"phone": "+1 (555) 755-2202",
+			"email": "r.adams@tachyonmotors.com",
+			"avatar_email": "r.adams@tachyonmotors.com"
+		},
+		{
+			"id": "emp_006",
+			"dealership_id": "dlr_001",
+			"name": "Selena Kansas",
+			"designation": "BDC Representative",
+			"phone": "+1 (555) 755-2885",
+			"email": "s.kansas@tachyonmotors.com",
+			"avatar_email": "s.kansas@tachyonmotors.com"
+		},
+		{
+			"id": "emp_007",
+			"dealership_id": "dlr_001",
+			"name": "Eleanor Lindsey",
+			"designation": "Parts Manager",
+			"phone": "+1 (555) 755-1052",
+			"email": "e.lindsey@tachyonmotors.com",
+			"avatar_email": "e.lindsey@tachyonmotors.com"
+		},
+		{
+			"id": "emp_008",
+			"dealership_id": "dlr_001",
+			"name": "Dean Wesrey",
+			"designation": "Service Technician",
+			"phone": "+1 (755) 555-2106",
+			"email": "d.wesrey@tachyonmotors.com",
+			"avatar_email": "d.wesrey@tachyonmotors.com"
+		},
+		{
+			"id": "emp_009",
+			"dealership_id": "dlr_001",
+			"name": "Todd Bonzales",
+			"designation": "Detail Specialist",
+			"phone": "+1 (555) 755-2107",
+			"email": "t.bonzales@tachyonmotors.com",
+			"avatar_email": "t.bonzales@tachyonmotors.com"
+		},
+		{
+			"id": "emp_010",
+			"dealership_id": "dlr_001",
+			"name": "Willie Dustice",
+			"designation": "Lot Attendant",
+			"phone": "+1 (575) 755-2000",
+			"email": "e.dustice@tachyonmotors.com",
+			"avatar_email": "e.dustice@tachyonmotors.com"
+		},
+		{
+			"id": "emp_011",
+			"dealership_id": "dlr_001",
+			"name": "Carlos Elliott",
+			"designation": "Internet Sales Manager",
+			"phone": "+1 (555) 755-2109",
+			"email": "c.elliott@tachyonmotors.com",
+			"avatar_email": "c.elliott@tachyonmotors.com"
+		},
+		{
+			"id": "emp_012",
+			"dealership_id": "dlr_001",
+			"name": "Ryan Carter",
+			"designation": "Warranty Administrator",
+			"phone": "",
+			"email": "r.carter@tachyonmotors.com",
+			"avatar_email": "r.carter@tachyonmotors.com"
+		},
+		{
+			"id": "emp_013",
+			"dealership_id": "dlr_001",
+			"name": "Jimmy Dsouza",
+			"designation": "Inventory Manager",
+			"phone": "",
+			"email": "j.dsouza@tachyonmotors.com",
+			"avatar_email": "j.dsouza@tachyonmotors.com"
+		},
+		{
+			"id": "emp_014",
+			"dealership_id": "dlr_001",
+			"name": "Paul McMohan",
+			"designation": "Controller",
+			"phone": "",
+			"email": "p.mcmohan@tachyonmotors.com",
+			"avatar_email": "p.mcmohan@tachyonmotors.com"
+		}
+	],
+
+	"customers": [
+		{
+			"id": "cust_001",
+			"name": "Matilda Dayton",
+			"phone": "+1 (311) 555-2368",
+			"email": "matildadayton@tmail.com",
+			"avatar_email": "matildadayton@tmail.com"
+		},
+		{
+			"id": "cust_002",
+			"name": "Curtis Gable",
+			"phone": "+1 (555) 555-2368",
+			"email": "curtisgable@tmail.com",
+			"avatar_email": "curtisgable@tmail.com"
+		},
+		{
+			"id": "cust_003",
+			"name": "Tony Smehrik",
+			"phone": "+1 (715) 555-0100",
+			"email": "tonysmehrik@tmail.com",
+			"avatar_email": "tonysmehrik@tmail.com"
+		},
+		{
+			"id": "cust_004",
+			"name": "Arista Delgato",
+			"phone": "+1 (775) 555-0101",
+			"email": "aristadelgato@tmail.com",
+			"avatar_email": "aristadelgato@tmail.com"
+		},
+		{
+			"id": "cust_005",
+			"name": "Flora Fleisher",
+			"phone": "+1 (642) 555-0199",
+			"email": "florafleisher@tmail.com",
+			"avatar_email": "florafleisher@tmail.com"
+		},
+		{
+			"id": "cust_006",
+			"name": "Mike Sernandez",
+			"phone": "+1 (869) 555-0189",
+			"email": "mikesernandez@tmail.com",
+			"avatar_email": "mikesernandez@tmail.com"
+		},
+		{
+			"id": "cust_007",
+			"name": "Shakil Omar",
+			"phone": "+1 (444) 555-0159",
+			"email": "shakilomar@tmail.com",
+			"avatar_email": "shakilomar@tmail.com"
+		},
+		{
+			"id": "cust_008",
+			"name": "Deshaun Williams",
+			"phone": "+1 (323) 555-0199",
+			"email": "deshaunwilliams@tmail.com",
+			"avatar_email": "deshaunwilliams@tmail.com"
+		},
+		{
+			"id": "cust_009",
+			"name": "Jerome Hendrix",
+			"phone": "+1 (963) 555-0106",
+			"email": "jeromehendriz@tmail.com",
+			"avatar_email": "jeromehendriz@tmail.com"
+		},
+		{
+			"id": "cust_010",
+			"name": "Vincent Lamar",
+			"phone": "+1 (852) 555-0157",
+			"email": "vincentlamar@tmail.com",
+			"avatar_email": "vincentlamar@tmail.com"
+		},
+		{
+			"id": "cust_011",
+			"name": "Brandon Davis",
+			"phone": "+1 (741) 555-0168",
+			"email": "brandondavis@tmail.com",
+			"avatar_email": "brandondavis@tmail.com"
+		},
+		{
+			"id": "cust_012",
+			"name": "Joshua Wright",
+			"phone": "+1 (715) 555-0179",
+			"email": "joshuawright@tmail.com",
+			"avatar_email": "joshuawright@tmail.com"
+		},
+		{
+			"id": "cust_013",
+			"name": "Alex Parker",
+			"phone": "+1 (715) 555-0110",
+			"email": "alexparker@tmail.com",
+			"avatar_email": "alexparker@tmail.com"
+		},
+		{
+			"id": "cust_014",
+			"name": "Samuel Wilson",
+			"phone": "+1 (715) 555-0111",
+			"email": "samuelwilson@tmail.com",
+			"avatar_email": "samuelwilson@tmail.com"
+		},
+		{
+			"id": "cust_015",
+			"name": "Ann Taylor",
+			"phone": "",
+			"email": "ann.taylor@tmail.com",
+			"avatar_email": "ann.taylor@tmail.com"
+		}
+	],
+
+	"vehicles": [
+		{
+			"id": "veh_001",
+			"dealership_id": "dlr_001",
+			"year": 2023,
+			"make": "Nebula",
+			"model": "Nimbus",
+			"vin": "1HGCM82633A004352"
+		},
+		{
+			"id": "veh_002",
+			"dealership_id": "dlr_002",
+			"year": 2022,
+			"make": "Lunar",
+			"model": "Blitz",
+			"vin": "2FTRX18W1XCA12345"
+		},
+		{
+			"id": "veh_003",
+			"dealership_id": "dlr_003",
+			"year": 2023,
+			"make": "Galactic",
+			"model": "Mirage",
+			"vin": "3N1BC13E78L246897"
+		},
+		{
+			"id": "veh_004",
+			"dealership_id": "dlr_004",
+			"year": 2023,
+			"make": "Stealth",
+			"model": "Nebula",
+			"vin": "1FTSW21R08EC56789"
+		},
+		{
+			"id": "veh_005",
+			"dealership_id": "dlr_005",
+			"year": 2023,
+			"make": "Aero",
+			"model": "Vibe",
+			"vin": "4T1BF1FK5GU185432"
+		},
+		{
+			"id": "veh_006",
+			"dealership_id": "dlr_006",
+			"year": 2023,
+			"make": "Quantum",
+			"model": "Shift",
+			"vin": "JH4KA4650MC012345"
+		},
+		{
+			"id": "veh_007",
+			"dealership_id": "dlr_007",
+			"year": 2022,
+			"make": "Electric",
+			"model": "Phantom",
+			"vin": "1C4RJFBG6LC543210"
+		},
+		{
+			"id": "veh_008",
+			"dealership_id": "dlr_008",
+			"year": 2023,
+			"make": "Lunar",
+			"model": "Flare",
+			"vin": "5YJSA1E27HF234567"
+		},
+		{
+			"id": "veh_009",
+			"dealership_id": "dlr_009",
+			"year": 2020,
+			"make": "Event",
+			"model": "Horizon",
+			"vin": "KMHCT4AE7EU789654"
+		},
+		{
+			"id": "veh_010",
+			"dealership_id": "dlr_001",
+			"year": 2018,
+			"make": "Alpha",
+			"model": "Quadrant",
+			"vin": "SALWR2RV0KA123456"
+		}
+	],
+
+	"services": [
+		{
+			"id": "svc_001",
+			"name": "Replace engine air filter",
+			"price": 34.95,
+			"category": "Maintenance"
+		},
+		{
+			"id": "svc_002",
+			"name": "Cabin Filter",
+			"price": 39.95,
+			"category": "Maintenance"
+		},
+		{
+			"id": "svc_003",
+			"name": "Wiper blades",
+			"price": 39.99,
+			"category": "Maintenance"
+		},
+		{
+			"id": "svc_004",
+			"name": "Rear wiper blades",
+			"price": 16.99,
+			"category": "Maintenance"
+		},
+		{
+			"id": "svc_005",
+			"name": "Front brake pads",
+			"price": 89.95,
+			"category": "Brakes"
+		},
+		{
+			"id": "svc_006",
+			"name": "Front rotors (each)",
+			"price": 115.65,
+			"category": "Brakes"
+		},
+		{
+			"id": "svc_007",
+			"name": "Rear brake shoes",
+			"price": 135.0,
+			"category": "Brakes"
+		},
+		{
+			"id": "svc_008",
+			"name": "Rear brake drums",
+			"price": 158.8,
+			"category": "Brakes"
+		}
+	],
+
+	"dateTimeFormats": {
+		"date": "MM/DD/YYYY",
+		"time": "12h (e.g. 3:35am or 12:21pm)",
+		"sampleDates": [
+			"04/08/2026",
+			"01/15/2026",
+			"12/25/2025",
+			"07/04/2026",
+			"11/28/2025",
+			"03/17/2026",
+			"09/01/2025",
+			"06/15/2026"
+		],
+		"sampleTimes": [
+			"3:35am",
+			"12:21pm",
+			"9:00am",
+			"5:45pm",
+			"8:30am",
+			"2:15pm",
+			"7:00am",
+			"11:45am"
+		]
+	}
+}
