@@ -22,6 +22,21 @@ function shuffle(arr) {
 	return a;
 }
 
+// ── Utility: check if a node supports image fills ──
+function canHaveImageFill(node) {
+	return (
+		node.type === "RECTANGLE" ||
+		node.type === "ELLIPSE" ||
+		node.type === "POLYGON" ||
+		node.type === "STAR" ||
+		node.type === "VECTOR" ||
+		node.type === "FRAME" ||
+		node.type === "COMPONENT" ||
+		node.type === "INSTANCE" ||
+		node.type === "GROUP"
+	);
+}
+
 figma.ui.onmessage = async (msg) => {
 	// ── Apply shuffled texts from a field to selected text layers ──
 	if (msg.type === "apply-random-text") {
@@ -34,9 +49,8 @@ figma.ui.onmessage = async (msg) => {
 		const pool = shuffle(msg.values);
 		let applied = 0;
 		for (let i = 0; i < textNodes.length; i++) {
-			const node = textNodes[i];
-			await loadFonts(node);
-			node.characters = pool[i % pool.length];
+			await loadFonts(textNodes[i]);
+			textNodes[i].characters = pool[i % pool.length];
 			applied++;
 		}
 		figma.notify(`✓ Applied random text to ${applied} layer(s)`);
@@ -57,32 +71,82 @@ figma.ui.onmessage = async (msg) => {
 		figma.notify(`✓ Applied to ${textNodes.length} layer(s)`);
 	}
 
-	// ── Apply avatar image as fill to selected shapes ──
+	// ── Apply avatar image as fill to selected shapes/frames/auto-layout ──
 	if (msg.type === "apply-avatar") {
 		const sel = figma.currentPage.selection;
 		if (sel.length === 0) {
-			figma.notify("⚠ Select a shape layer first.");
+			figma.notify("⚠ Select a shape, frame, or auto-layout layer.");
 			return;
 		}
+
 		try {
-			const imgBytes = await figma.createImageAsync(msg.url);
+			// Download the image from the GitHub URL
+			const resp = await fetch(msg.url);
+			if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+			const buffer = await resp.arrayBuffer();
+			const imgBytes = new Uint8Array(buffer);
+
+			// Create an image in Figma from the raw bytes
+			const image = figma.createImage(imgBytes);
+
 			let applied = 0;
 			for (const node of sel) {
-				if ("fills" in node) {
+				if (canHaveImageFill(node) && "fills" in node) {
+					// Replace all fills with the avatar image fill
 					node.fills = [
 						{
 							type: "IMAGE",
 							scaleMode: "FILL",
-							imageHash: imgBytes.hash,
+							imageHash: image.hash,
 						},
 					];
 					applied++;
 				}
 			}
-			figma.notify(`✓ Applied avatar to ${applied} layer(s)`);
+
+			if (applied === 0) {
+				figma.notify("⚠ Select shapes, frames, or auto-layout containers.");
+			} else {
+				figma.notify(`✓ Applied avatar to ${applied} layer(s)`);
+			}
 		} catch (e) {
-			figma.notify("⚠ Failed to load avatar image.");
+			console.error("Avatar load error:", e);
+			figma.notify("⚠ Failed to load avatar: " + e.message);
 		}
+	}
+
+	// ── Shuffle avatars: apply random avatars from a list to selected shapes ──
+	if (msg.type === "apply-random-avatars") {
+		const sel = figma.currentPage.selection;
+		const fillable = sel.filter((n) => canHaveImageFill(n) && "fills" in n);
+		if (fillable.length === 0) {
+			figma.notify("⚠ Select shapes or frames for avatar fills.");
+			return;
+		}
+
+		const urls = shuffle(msg.urls);
+		let applied = 0;
+
+		for (let i = 0; i < fillable.length; i++) {
+			const url = urls[i % urls.length];
+			try {
+				const resp = await fetch(url);
+				if (!resp.ok) continue;
+				const buffer = await resp.arrayBuffer();
+				const image = figma.createImage(new Uint8Array(buffer));
+				fillable[i].fills = [
+					{
+						type: "IMAGE",
+						scaleMode: "FILL",
+						imageHash: image.hash,
+					},
+				];
+				applied++;
+			} catch (e) {
+				console.error("Failed to load:", url, e);
+			}
+		}
+		figma.notify(`✓ Applied ${applied} avatar(s) to selection`);
 	}
 
 	// ── Apply SVG icon into selected frames/shapes ──
@@ -118,23 +182,5 @@ figma.ui.onmessage = async (msg) => {
 				? `✓ Placed icon in ${applied} layer(s)`
 				: "⚠ Select frames or components.",
 		);
-	}
-
-	// ── Apply a complete record (name → text, avatar → image fills) ──
-	if (msg.type === "apply-record") {
-		const sel = figma.currentPage.selection;
-		if (sel.length === 0) {
-			figma.notify("⚠ Select layers first.");
-			return;
-		}
-		// Apply text to all text layers
-		const textNodes = sel.filter((n) => n.type === "TEXT");
-		if (textNodes.length > 0 && msg.value) {
-			for (const node of textNodes) {
-				await loadFonts(node);
-				node.characters = msg.value;
-			}
-		}
-		figma.notify(`✓ Applied record data`);
 	}
 };

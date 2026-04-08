@@ -511,8 +511,19 @@
 			</div>
 			<div class="panel-scroll" id="people-content"></div>
 			<div class="bottom-bar">
-				<button class="shuffle-btn-main" onclick="shufflePeople()">
-					Shuffle names to selection
+				<button
+					class="shuffle-btn-main"
+					style="flex: 1"
+					onclick="shufflePeople()"
+				>
+					Shuffle names
+				</button>
+				<button
+					class="shuffle-btn-main"
+					style="flex: 1; background: #8e7cc3"
+					onclick="shuffleAvatars()"
+				>
+					Shuffle avatars
 				</button>
 			</div>
 		</div>
@@ -560,7 +571,7 @@
 			// CONFIG — Change this URL to your GitHub raw file
 			// ══════════════════════════════════════════════════════════
 			const DATA_URL =
-				"https://raw.githubusercontent.com/tekiondesign/tekion-content-reel/main/dealership-data.json";
+				"https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/dealership-data.json";
 
 			// ══════════════════════════════════════════════════════════
 			// STATE
@@ -588,9 +599,6 @@
 					// Build relational lookups
 					DB._dealerMap = {};
 					DB.dealerships.forEach((d) => (DB._dealerMap[d.id] = d));
-
-					// Compute Gravatar hashes for all people
-					await computeGravatarHashes();
 
 					renderTextSubTab();
 					renderPeopleTab();
@@ -623,39 +631,10 @@
 				parent.postMessage({ pluginMessage: msg }, "*");
 			}
 
-			// ── Gravatar: SHA-256 hash via Web Crypto API ──
-			async function sha256(str) {
-				const buf = await crypto.subtle.digest(
-					"SHA-256",
-					new TextEncoder().encode(str),
-				);
-				return Array.from(new Uint8Array(buf))
-					.map((b) => b.toString(16).padStart(2, "0"))
-					.join("");
-			}
-
-			// Gravatar URL from email. Default style: "monsterid" generates unique faces.
-			// Other options: "identicon", "robohash", "wavatar", "retro"
-			const GRAVATAR_DEFAULT = "monsterid";
-			const GRAVATAR_SIZE = 150;
-
-			function gravatarUrl(hash) {
-				return `https://gravatar.com/avatar/${hash}?s=${GRAVATAR_SIZE}&d=${GRAVATAR_DEFAULT}`;
-			}
-
-			// Pre-compute all gravatar hashes once data loads
-			async function computeGravatarHashes() {
-				const allPeople = [...(DB.employees || []), ...(DB.customers || [])];
-				for (const p of allPeople) {
-					const email = (p.avatar_email || p.email || "").trim().toLowerCase();
-					if (email) {
-						p._gravatarHash = await sha256(email);
-						p._gravatarUrl = gravatarUrl(p._gravatarHash);
-					} else {
-						p._gravatarHash = await sha256(p.id);
-						p._gravatarUrl = gravatarUrl(p._gravatarHash);
-					}
-				}
+			// Build full avatar URL from relative path in JSON
+			function avatarUrl(person) {
+				if (!person.avatar || !DB) return "";
+				return DB.avatarBasePath + "/" + encodeURI(person.avatar);
 			}
 
 			function pill(label, value) {
@@ -871,11 +850,15 @@
 					const meta =
 						[p.designation, dealer?.name].filter(Boolean).join(" · ") ||
 						p.email;
-					const avatarSrc = p._gravatarUrl || gravatarUrl("00000000");
+					const avatarSrc = avatarUrl(p);
 
 					html += `<div class="record-card" onclick="toggleRecord('${p.id}')">
       <div class="record-avatar" style="background:${color}">
-        <img src="${avatarSrc}" onerror="this.style.display='none';this.parentNode.textContent='${initials}';" loading="lazy"/>
+        ${
+					avatarSrc
+						? `<img src="${avatarSrc}" onerror="this.style.display='none';this.parentNode.textContent='${initials}';" loading="lazy"/>`
+						: initials
+				}
       </div>
       <div class="record-info">
         <div class="record-name">${p.name}</div>
@@ -883,7 +866,7 @@
       </div>
     </div>`;
 
-					// Always show field pills
+					// Field pills for applying individual data
 					html += `<div class="record-fields">
       ${pill("Name", p.name)}
       ${p.designation ? pill("Title", p.designation) : ""}
@@ -913,6 +896,14 @@
 				const list =
 					currentPeopleTab === "employees" ? DB.employees : DB.customers;
 				postMsg({ type: "apply-random-text", values: list.map((p) => p.name) });
+			}
+
+			function shuffleAvatars() {
+				if (!DB) return;
+				const list =
+					currentPeopleTab === "employees" ? DB.employees : DB.customers;
+				const urls = list.map((p) => avatarUrl(p)).filter(Boolean);
+				postMsg({ type: "apply-random-avatars", urls });
 			}
 
 			// ══════════════════════════════════════════════════════════

@@ -8,13 +8,6 @@
 	"enableProposedApi": false,
 	"editorType": ["figma"],
 	"networkAccess": {
-		"allowedDomains": [
-			"https://raw.githubusercontent.com",
-			"https://gravatar.com",
-			"https://0.gravatar.com",
-			"https://1.gravatar.com",
-			"https://2.gravatar.com",
-			"https://www.gravatar.com"
-		]
+		"allowedDomains": ["https://raw.githubusercontent.com"]
 	}
 }

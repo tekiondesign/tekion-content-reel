@@ -1,6 +1,8 @@
 {
 	"version": "1.0.0",
 	"lastUpdated": "2026-04-08",
+	"repo": "https://github.com/Shafeeq-ux/tekion-content-reel",
+	"avatarBasePath": "https://raw.githubusercontent.com/Shafeeq-ux/tekion-content-reel/main",
 
 	"dealerships": [
 		{
@@ -85,7 +87,7 @@
 			"designation": "General Manager",
 			"phone": "+1 (555) 755-2099",
 			"email": "w.florez@tachyonmotors.com",
-			"avatar_email": "w.florez@tachyonmotors.com"
+			"avatar": "employees/William Florez.png"
 		},
 		{
 			"id": "emp_002",
@@ -94,7 +96,7 @@
 			"designation": "Sales Manager",
 			"phone": "+1 (775) 555-8569",
 			"email": "c.morris@tachyonmotors.com",
-			"avatar_email": "c.morris@tachyonmotors.com"
+			"avatar": "employees/Celine Morris.png"
 		},
 		{
 			"id": "emp_003",
@@ -103,7 +105,7 @@
 			"designation": "Finance Manager",
 			"phone": "+1 (555) 755-4646",
 			"email": "m.mcsriff@tachyonmotors.com",
-			"avatar_email": "m.mcsriff@tachyonmotors.com"
+			"avatar": "employees/Mario McSriff.png"
 		},
 		{
 			"id": "emp_004",
@@ -112,7 +114,7 @@
 			"designation": "Service Advisor",
 			"phone": "+1 (555) 755-2102",
 			"email": "m.truk@tachyonmotors.com",
-			"avatar_email": "m.truk@tachyonmotors.com"
+			"avatar": "employees/Mike Truk.png"
 		},
 		{
 			"id": "emp_005",
@@ -121,7 +123,7 @@
 			"designation": "Sales Consultant",
 			"phone": "+1 (555) 755-2202",
 			"email": "r.adams@tachyonmotors.com",
-			"avatar_email": "r.adams@tachyonmotors.com"
+			"avatar": "employees/Raynta Adams.png"
 		},
 		{
 			"id": "emp_006",
@@ -130,7 +132,7 @@
 			"designation": "BDC Representative",
 			"phone": "+1 (555) 755-2885",
 			"email": "s.kansas@tachyonmotors.com",
-			"avatar_email": "s.kansas@tachyonmotors.com"
+			"avatar": "employees/Selena Kansas.png"
 		},
 		{
 			"id": "emp_007",
@@ -139,7 +141,7 @@
 			"designation": "Parts Manager",
 			"phone": "+1 (555) 755-1052",
 			"email": "e.lindsey@tachyonmotors.com",
-			"avatar_email": "e.lindsey@tachyonmotors.com"
+			"avatar": "employees/Eleanor Lindsey.png"
 		},
 		{
 			"id": "emp_008",
@@ -148,7 +150,7 @@
 			"designation": "Service Technician",
 			"phone": "+1 (755) 555-2106",
 			"email": "d.wesrey@tachyonmotors.com",
-			"avatar_email": "d.wesrey@tachyonmotors.com"
+			"avatar": "employees/Dean Wesrey.png"
 		},
 		{
 			"id": "emp_009",
@@ -157,7 +159,7 @@
 			"designation": "Detail Specialist",
 			"phone": "+1 (555) 755-2107",
 			"email": "t.bonzales@tachyonmotors.com",
-			"avatar_email": "t.bonzales@tachyonmotors.com"
+			"avatar": "employees/Todd Bonzales.png"
 		},
 		{
 			"id": "emp_010",
@@ -166,7 +168,7 @@
 			"designation": "Lot Attendant",
 			"phone": "+1 (575) 755-2000",
 			"email": "e.dustice@tachyonmotors.com",
-			"avatar_email": "e.dustice@tachyonmotors.com"
+			"avatar": "employees/Willie Dustice.png"
 		},
 		{
 			"id": "emp_011",
@@ -175,7 +177,7 @@
 			"designation": "Internet Sales Manager",
 			"phone": "+1 (555) 755-2109",
 			"email": "c.elliott@tachyonmotors.com",
-			"avatar_email": "c.elliott@tachyonmotors.com"
+			"avatar": "employees/Carlos Elliott.png"
 		},
 		{
 			"id": "emp_012",
@@ -184,7 +186,7 @@
 			"designation": "Warranty Administrator",
 			"phone": "",
 			"email": "r.carter@tachyonmotors.com",
-			"avatar_email": "r.carter@tachyonmotors.com"
+			"avatar": "employees/Ryan Carter.png"
 		},
 		{
 			"id": "emp_013",
@@ -193,7 +195,7 @@
 			"designation": "Inventory Manager",
 			"phone": "",
 			"email": "j.dsouza@tachyonmotors.com",
-			"avatar_email": "j.dsouza@tachyonmotors.com"
+			"avatar": "employees/Jimmy Dsouza.png"
 		},
 		{
 			"id": "emp_014",
@@ -202,7 +204,7 @@
 			"designation": "Controller",
 			"phone": "",
 			"email": "p.mcmohan@tachyonmotors.com",
-			"avatar_email": "p.mcmohan@tachyonmotors.com"
+			"avatar": "employees/Paul McMohan.png"
 		}
 	],
 
@@ -212,105 +214,105 @@
 			"name": "Matilda Dayton",
 			"phone": "+1 (311) 555-2368",
 			"email": "matildadayton@tmail.com",
-			"avatar_email": "matildadayton@tmail.com"
+			"avatar": "customers/Matilda Dayton.png"
 		},
 		{
 			"id": "cust_002",
 			"name": "Curtis Gable",
 			"phone": "+1 (555) 555-2368",
 			"email": "curtisgable@tmail.com",
-			"avatar_email": "curtisgable@tmail.com"
+			"avatar": "customers/Curtis Gable.png"
 		},
 		{
 			"id": "cust_003",
 			"name": "Tony Smehrik",
 			"phone": "+1 (715) 555-0100",
 			"email": "tonysmehrik@tmail.com",
-			"avatar_email": "tonysmehrik@tmail.com"
+			"avatar": "customers/Tony Smehrik.png"
 		},
 		{
 			"id": "cust_004",
 			"name": "Arista Delgato",
 			"phone": "+1 (775) 555-0101",
 			"email": "aristadelgato@tmail.com",
-			"avatar_email": "aristadelgato@tmail.com"
+			"avatar": "customers/Arista Delgato.png"
 		},
 		{
 			"id": "cust_005",
 			"name": "Flora Fleisher",
 			"phone": "+1 (642) 555-0199",
 			"email": "florafleisher@tmail.com",
-			"avatar_email": "florafleisher@tmail.com"
+			"avatar": "customers/Flora Fleisher.png"
 		},
 		{
 			"id": "cust_006",
 			"name": "Mike Sernandez",
 			"phone": "+1 (869) 555-0189",
 			"email": "mikesernandez@tmail.com",
-			"avatar_email": "mikesernandez@tmail.com"
+			"avatar": "customers/Mike Sernandez.png"
 		},
 		{
 			"id": "cust_007",
 			"name": "Shakil Omar",
 			"phone": "+1 (444) 555-0159",
 			"email": "shakilomar@tmail.com",
-			"avatar_email": "shakilomar@tmail.com"
+			"avatar": "customers/Shakil Omar.png"
 		},
 		{
 			"id": "cust_008",
 			"name": "Deshaun Williams",
 			"phone": "+1 (323) 555-0199",
 			"email": "deshaunwilliams@tmail.com",
-			"avatar_email": "deshaunwilliams@tmail.com"
+			"avatar": "customers/Deshaun Williams.png"
 		},
 		{
 			"id": "cust_009",
 			"name": "Jerome Hendrix",
 			"phone": "+1 (963) 555-0106",
 			"email": "jeromehendriz@tmail.com",
-			"avatar_email": "jeromehendriz@tmail.com"
+			"avatar": "customers/Jerome Hendrix.png"
 		},
 		{
 			"id": "cust_010",
 			"name": "Vincent Lamar",
 			"phone": "+1 (852) 555-0157",
 			"email": "vincentlamar@tmail.com",
-			"avatar_email": "vincentlamar@tmail.com"
+			"avatar": "customers/Vincent Lamar.png"
 		},
 		{
 			"id": "cust_011",
 			"name": "Brandon Davis",
 			"phone": "+1 (741) 555-0168",
 			"email": "brandondavis@tmail.com",
-			"avatar_email": "brandondavis@tmail.com"
+			"avatar": "customers/Brandon Davis.png"
 		},
 		{
 			"id": "cust_012",
 			"name": "Joshua Wright",
 			"phone": "+1 (715) 555-0179",
 			"email": "joshuawright@tmail.com",
-			"avatar_email": "joshuawright@tmail.com"
+			"avatar": "customers/Joshua Wright.png"
 		},
 		{
 			"id": "cust_013",
 			"name": "Alex Parker",
 			"phone": "+1 (715) 555-0110",
 			"email": "alexparker@tmail.com",
-			"avatar_email": "alexparker@tmail.com"
+			"avatar": "customers/Alex Parker.png"
 		},
 		{
 			"id": "cust_014",
 			"name": "Samuel Wilson",
 			"phone": "+1 (715) 555-0111",
 			"email": "samuelwilson@tmail.com",
-			"avatar_email": "samuelwilson@tmail.com"
+			"avatar": "customers/Samuel Wilson.png"
 		},
 		{
 			"id": "cust_015",
 			"name": "Ann Taylor",
 			"phone": "",
 			"email": "ann.taylor@tmail.com",
-			"avatar_email": "ann.taylor@tmail.com"
+			"avatar": "customers/Ann Taylor.png"
 		}
 	],
 
