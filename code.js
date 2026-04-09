@@ -22,23 +22,13 @@ function shuffle(arr) {
 	return a;
 }
 
-// ── Utility: check if a node supports image fills ──
+// ── Utility: check if node supports image fills ──
 function canHaveImageFill(node) {
-	return (
-		node.type === "RECTANGLE" ||
-		node.type === "ELLIPSE" ||
-		node.type === "POLYGON" ||
-		node.type === "STAR" ||
-		node.type === "VECTOR" ||
-		node.type === "FRAME" ||
-		node.type === "COMPONENT" ||
-		node.type === "INSTANCE" ||
-		node.type === "GROUP"
-	);
+	return "fills" in node && node.type !== "TEXT" && node.type !== "GROUP";
 }
 
 figma.ui.onmessage = async (msg) => {
-	// ── Apply shuffled texts from a field to selected text layers ──
+	// ── Apply shuffled texts ──
 	if (msg.type === "apply-random-text") {
 		const sel = figma.currentPage.selection;
 		const textNodes = sel.filter((n) => n.type === "TEXT");
@@ -56,7 +46,7 @@ figma.ui.onmessage = async (msg) => {
 		figma.notify(`✓ Applied random text to ${applied} layer(s)`);
 	}
 
-	// ── Apply single clicked text ──
+	// ── Apply single text ──
 	if (msg.type === "apply-single-text") {
 		const sel = figma.currentPage.selection;
 		const textNodes = sel.filter((n) => n.type === "TEXT");
@@ -71,69 +61,58 @@ figma.ui.onmessage = async (msg) => {
 		figma.notify(`✓ Applied to ${textNodes.length} layer(s)`);
 	}
 
-	// ── Apply avatar image as fill to selected shapes/frames/auto-layout ──
-	if (msg.type === "apply-avatar") {
+	// ── Apply avatar image from bytes sent by UI ──
+	if (msg.type === "apply-avatar-bytes") {
 		const sel = figma.currentPage.selection;
 		if (sel.length === 0) {
 			figma.notify("⚠ Select a shape, frame, or auto-layout layer.");
 			return;
 		}
+		const fillable = sel.filter((n) => canHaveImageFill(n));
+		if (fillable.length === 0) {
+			figma.notify(
+				"⚠ No fillable layers. Select rectangles, ellipses, frames, etc.",
+			);
+			return;
+		}
 
 		try {
-			// Download the image from the GitHub URL
-			const resp = await fetch(msg.url);
-			if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-			const buffer = await resp.arrayBuffer();
-			const imgBytes = new Uint8Array(buffer);
-
-			// Create an image in Figma from the raw bytes
-			const image = figma.createImage(imgBytes);
-
+			const bytes = new Uint8Array(msg.bytes);
+			const image = figma.createImage(bytes);
 			let applied = 0;
-			for (const node of sel) {
-				if (canHaveImageFill(node) && "fills" in node) {
-					// Replace all fills with the avatar image fill
-					node.fills = [
-						{
-							type: "IMAGE",
-							scaleMode: "FILL",
-							imageHash: image.hash,
-						},
-					];
-					applied++;
-				}
+			for (const node of fillable) {
+				node.fills = [
+					{
+						type: "IMAGE",
+						scaleMode: "FILL",
+						imageHash: image.hash,
+					},
+				];
+				applied++;
 			}
-
-			if (applied === 0) {
-				figma.notify("⚠ Select shapes, frames, or auto-layout containers.");
-			} else {
-				figma.notify(`✓ Applied avatar to ${applied} layer(s)`);
-			}
+			figma.notify(`✓ Applied avatar to ${applied} layer(s)`);
 		} catch (e) {
-			console.error("Avatar load error:", e);
-			figma.notify("⚠ Failed to load avatar: " + e.message);
+			console.error("Avatar apply error:", e);
+			figma.notify("⚠ Failed to apply avatar image.");
 		}
 	}
 
-	// ── Shuffle avatars: apply random avatars from a list to selected shapes ──
-	if (msg.type === "apply-random-avatars") {
+	// ── Shuffle random avatars (bytes array from UI) ──
+	if (msg.type === "apply-random-avatar-bytes") {
 		const sel = figma.currentPage.selection;
-		const fillable = sel.filter((n) => canHaveImageFill(n) && "fills" in n);
+		const fillable = sel.filter((n) => canHaveImageFill(n));
 		if (fillable.length === 0) {
 			figma.notify("⚠ Select shapes or frames for avatar fills.");
 			return;
 		}
 
-		const urls = shuffle(msg.urls);
+		const allBytes = msg.bytesArray; // array of Uint8Array-compatible arrays
 		let applied = 0;
-
 		for (let i = 0; i < fillable.length; i++) {
-			const url = urls[i % urls.length];
+			const imgData = allBytes[i % allBytes.length];
+			if (!imgData) continue;
 			try {
-				const resp = await fetch(url);
-				if (!resp.ok) continue;
-				const buffer = await resp.arrayBuffer();
-				const image = figma.createImage(new Uint8Array(buffer));
+				const image = figma.createImage(new Uint8Array(imgData));
 				fillable[i].fills = [
 					{
 						type: "IMAGE",
@@ -143,13 +122,41 @@ figma.ui.onmessage = async (msg) => {
 				];
 				applied++;
 			} catch (e) {
-				console.error("Failed to load:", url, e);
+				console.error("Failed to apply avatar:", e);
 			}
 		}
 		figma.notify(`✓ Applied ${applied} avatar(s) to selection`);
 	}
 
-	// ── Apply SVG icon into selected frames/shapes ──
+	// ── Fallback: try figma.createImageAsync if UI fetch failed ──
+	if (msg.type === "apply-avatar-fallback") {
+		const sel = figma.currentPage.selection;
+		const fillable = sel.filter((n) => canHaveImageFill(n));
+		if (fillable.length === 0) {
+			figma.notify("⚠ No fillable layers selected.");
+			return;
+		}
+		try {
+			const image = await figma.createImageAsync(msg.url);
+			for (const node of fillable) {
+				node.fills = [
+					{
+						type: "IMAGE",
+						scaleMode: "FILL",
+						imageHash: image.hash,
+					},
+				];
+			}
+			figma.notify(`✓ Applied avatar to ${fillable.length} layer(s)`);
+		} catch (e) {
+			console.error("Fallback also failed:", e);
+			figma.notify(
+				"⚠ Could not load image. Check URL and network permissions.",
+			);
+		}
+	}
+
+	// ── Apply SVG icon ──
 	if (msg.type === "apply-icon") {
 		const sel = figma.currentPage.selection;
 		if (sel.length === 0) {

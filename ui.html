@@ -176,11 +176,14 @@
 				font-weight: 700;
 				color: #fff;
 				overflow: hidden;
+				position: relative;
 			}
 			.record-avatar img {
+				display: block;
 				width: 100%;
 				height: 100%;
 				object-fit: cover;
+				border-radius: 50%;
 			}
 			.record-info {
 				flex: 1;
@@ -417,6 +420,27 @@
 				font-size: 12px;
 			}
 
+			/* ── Icon filter bar ── */
+			.icon-filter-bar {
+				padding: 4px 12px 6px;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				border-bottom: 1px solid #f0f0f0;
+				flex-shrink: 0;
+			}
+			.icon-filter-bar select {
+				padding: 3px 6px;
+				border: 1px solid #ddd;
+				border-radius: 4px;
+				font-size: 11px;
+				max-width: 180px;
+			}
+			.icon-count-label {
+				font-size: 10px;
+				color: #aaa;
+			}
+
 			/* ── Source badge ── */
 			.source-bar {
 				padding: 4px 12px;
@@ -534,8 +558,8 @@
 				<input
 					type="text"
 					id="icon-search"
-					placeholder="Search Phosphor icons..."
-					oninput="renderIconPanel()"
+					placeholder="Search 1,500+ Phosphor icons..."
+					oninput="onIconSearch()"
 				/>
 			</div>
 			<div class="weight-bar">
@@ -546,14 +570,36 @@
 					onclick="setWeight('regular')"
 					>Regular</span
 				>
+				<span class="weight-chip" data-w="thin" onclick="setWeight('thin')"
+					>Thin</span
+				>
+				<span class="weight-chip" data-w="light" onclick="setWeight('light')"
+					>Light</span
+				>
 				<span class="weight-chip" data-w="bold" onclick="setWeight('bold')"
 					>Bold</span
 				>
 				<span class="weight-chip" data-w="fill" onclick="setWeight('fill')"
 					>Fill</span
 				>
+				<span
+					class="weight-chip"
+					data-w="duotone"
+					onclick="setWeight('duotone')"
+					>Duotone</span
+				>
 			</div>
-			<div class="panel-scroll" id="icon-list"></div>
+			<div class="icon-filter-bar">
+				<select id="icon-category-filter" onchange="onIconSearch()">
+					<option value="">All categories</option>
+				</select>
+				<span id="icon-count" class="icon-count-label">Loading…</span>
+			</div>
+			<div class="panel-scroll" id="icon-list" onscroll="onIconScroll()"></div>
+			<div id="icon-loading" class="loading" style="display: none">
+				<div class="spinner"></div>
+				<div>Loading Phosphor icons…</div>
+			</div>
 		</div>
 
 		<div class="source-bar" id="source-bar">
@@ -571,7 +617,7 @@
 			// CONFIG — Change this URL to your GitHub raw file
 			// ══════════════════════════════════════════════════════════
 			const DATA_URL =
-				"https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/dealership-data.json";
+				"https://raw.githubusercontent.com/tekiondesign/tekion-content-reel/main/dealership-data.json";
 
 			// ══════════════════════════════════════════════════════════
 			// STATE
@@ -633,8 +679,11 @@
 
 			// Build full avatar URL from relative path in JSON
 			function avatarUrl(person) {
-				if (!person.avatar || !DB) return "";
-				return DB.avatarBasePath + "/" + encodeURI(person.avatar);
+				if (!person.avatar || !DB || !DB.avatarBasePath) return "";
+				// Encode spaces and special chars in the filename for URL
+				const parts = person.avatar.split("/");
+				const encoded = parts.map((p) => encodeURIComponent(p)).join("/");
+				return DB.avatarBasePath + "/" + encoded;
 			}
 
 			function pill(label, value) {
@@ -838,6 +887,7 @@
 				);
 
 				let html = "";
+				const avatarLoadQueue = [];
 				filtered.forEach((p, i) => {
 					const initials = p.name
 						.split(" ")
@@ -851,14 +901,11 @@
 						[p.designation, dealer?.name].filter(Boolean).join(" · ") ||
 						p.email;
 					const avatarSrc = avatarUrl(p);
+					const avatarId = `avatar-${p.id}`;
 
 					html += `<div class="record-card" onclick="toggleRecord('${p.id}')">
-      <div class="record-avatar" style="background:${color}">
-        ${
-					avatarSrc
-						? `<img src="${avatarSrc}" onerror="this.style.display='none';this.parentNode.textContent='${initials}';" loading="lazy"/>`
-						: initials
-				}
+      <div class="record-avatar" style="background:${color}" id="${avatarId}">
+        <span>${initials}</span>
       </div>
       <div class="record-info">
         <div class="record-name">${p.name}</div>
@@ -874,17 +921,55 @@
       ${pill("Email", p.email)}
       ${
 				avatarSrc
-					? `<span class="field-pill" onclick="event.stopPropagation(); postMsg({type:'apply-avatar',url:'${esc(avatarSrc)}'})">
+					? `<span class="field-pill" onclick="event.stopPropagation(); applyAvatar('${esc(avatarSrc)}')">
         <span class="pill-label">Avatar:</span>Apply image
       </span>`
 					: ""
 			}
       ${dealer ? pill("Dealer", dealer.name) : ""}
     </div>`;
+
+					// Queue avatar thumbnail load
+					if (avatarSrc) {
+						avatarLoadQueue.push({ id: avatarId, url: avatarSrc });
+					}
 				});
 
 				container.innerHTML =
 					html || '<div class="empty-state">No people found</div>';
+
+				// Load avatar thumbnails asynchronously via XHR -> blob URL
+				avatarLoadQueue.forEach(({ id, url }) => {
+					loadAvatarThumbnail(id, url);
+				});
+			}
+
+			// Load a single avatar image via XHR and inject as blob URL into the DOM
+			function loadAvatarThumbnail(elementId, url) {
+				const xhr = new XMLHttpRequest();
+				xhr.open("GET", url, true);
+				xhr.responseType = "blob";
+				xhr.onload = () => {
+					if (xhr.status === 200) {
+						const blobUrl = URL.createObjectURL(xhr.response);
+						const el = document.getElementById(elementId);
+						if (el) {
+							const img = document.createElement("img");
+							img.src = blobUrl;
+							img.style.cssText =
+								"width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;";
+							img.onload = () => {
+								el.querySelector("span")?.remove();
+							};
+							img.onerror = () => {
+								URL.revokeObjectURL(blobUrl);
+							};
+							el.prepend(img);
+						}
+					}
+				};
+				xhr.onerror = () => {};
+				xhr.send();
 			}
 
 			function toggleRecord(id) {
@@ -898,12 +983,69 @@
 				postMsg({ type: "apply-random-text", values: list.map((p) => p.name) });
 			}
 
-			function shuffleAvatars() {
+			// ── Fetch image as bytes in UI, then send to code.js ──
+			// Use XMLHttpRequest because fetch() can have CORS issues in Figma plugin UI
+			function fetchImageBytes(url) {
+				return new Promise((resolve, reject) => {
+					const xhr = new XMLHttpRequest();
+					xhr.open("GET", url, true);
+					xhr.responseType = "arraybuffer";
+					xhr.onload = () => {
+						if (xhr.status === 200) {
+							resolve(new Uint8Array(xhr.response));
+						} else {
+							reject(new Error(`HTTP ${xhr.status}`));
+						}
+					};
+					xhr.onerror = () => reject(new Error("Network error"));
+					xhr.send();
+				});
+			}
+
+			async function applyAvatar(url) {
+				try {
+					const bytes = await fetchImageBytes(url);
+					postMsg({ type: "apply-avatar-bytes", bytes: Array.from(bytes) });
+				} catch (e) {
+					console.error("Failed to fetch avatar:", url, e);
+					// Try alternative URL format (add ?raw=true for GitHub)
+					try {
+						const altUrl = url.includes("?")
+							? url + "&raw=true"
+							: url + "?raw=true";
+						const bytes = await fetchImageBytes(altUrl);
+						postMsg({ type: "apply-avatar-bytes", bytes: Array.from(bytes) });
+					} catch (e2) {
+						console.error("Retry also failed:", url, e2);
+						postMsg({ type: "apply-avatar-fallback", url });
+					}
+				}
+			}
+
+			async function shuffleAvatars() {
 				if (!DB) return;
 				const list =
 					currentPeopleTab === "employees" ? DB.employees : DB.customers;
-				const urls = list.map((p) => avatarUrl(p)).filter(Boolean);
-				postMsg({ type: "apply-random-avatars", urls });
+				const urls = shuffle(list.map((p) => avatarUrl(p)).filter(Boolean));
+
+				const bytesArray = [];
+				for (const url of urls) {
+					try {
+						const bytes = await fetchImageBytes(url);
+						bytesArray.push(Array.from(bytes));
+					} catch (e) {
+						console.error("Skipping avatar:", url, e);
+					}
+				}
+
+				if (bytesArray.length === 0) {
+					alert(
+						"Could not load any avatar images. Check repo access and file names.",
+					);
+					return;
+				}
+
+				postMsg({ type: "apply-random-avatar-bytes", bytesArray });
 			}
 
 			// ══════════════════════════════════════════════════════════
@@ -1129,7 +1271,10 @@
 					.forEach((p) => p.classList.remove("active"));
 				document.getElementById(`panel-${tab}`).classList.add("active");
 				if (tab === "people") renderPeopleTab();
-				if (tab === "icon") renderIconPanel();
+				if (tab === "icon") {
+					if (!iconsLoaded) loadPhosphorCatalog();
+					else onIconSearch();
+				}
 			}
 
 			// ══════════════════════════════════════════════════════════

@@ -1,6 +1,6 @@
 {
-	"name": "Dealership Content Reel",
-	"id": "dealership-content-reel",
+	"name": "Tekion Content Reel",
+	"id": "tekion-content-reel",
 	"api": "1.0.0",
 	"main": "code.js",
 	"ui": "ui.html",
@@ -8,6 +8,11 @@
 	"enableProposedApi": false,
 	"editorType": ["figma"],
 	"networkAccess": {
-		"allowedDomains": ["https://raw.githubusercontent.com"]
+		"allowedDomains": [
+			"https://raw.githubusercontent.com",
+			"https://cdn.jsdelivr.net",
+			"https://data.jsdelivr.com",
+			"https://unpkg.com"
+		]
 	}
 }
