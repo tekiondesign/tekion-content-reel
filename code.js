@@ -26,6 +26,56 @@ function canHaveImageFill(node) {
 	return "fills" in node && node.type !== "TEXT" && node.type !== "GROUP";
 }
 
+// Recursively clear fills on frame/group nodes that act as SVG wrappers,
+// and remove any invisible bounding-box rectangles (256x256 with no visible paint)
+function cleanSvgFrame(frame) {
+	if ("fills" in frame && frame.type !== "TEXT") {
+		frame.fills = [];
+	}
+	if ("children" in frame) {
+		for (var i = frame.children.length - 1; i >= 0; i--) {
+			var child = frame.children[i];
+			// Remove invisible background rects (common in Phosphor raw SVGs)
+			if (
+				child.type === "RECTANGLE" &&
+				child.width >= 250 &&
+				child.height >= 250 &&
+				child.visible !== false
+			) {
+				var hasFill = false;
+				if ("fills" in child) {
+					var fills = child.fills;
+					for (var f = 0; f < fills.length; f++) {
+						if (fills[f].visible !== false && fills[f].opacity !== 0) {
+							// Check if it's a "none" fill (transparent) — skip those
+							if (fills[f].type === "SOLID" && fills[f].color) {
+								// Could be a background — remove if fully white or black with no opacity
+								hasFill = true;
+							}
+						}
+					}
+				}
+				// If it has no stroke and looks like a bounding box rect, remove it
+				var hasStroke = false;
+				if ("strokes" in child) {
+					for (var s = 0; s < child.strokes.length; s++) {
+						if (child.strokes[s].visible !== false) hasStroke = true;
+					}
+				}
+				if (!hasStroke) {
+					// Remove background rects — they're just bounding boxes
+					child.remove();
+					continue;
+				}
+			}
+			// Recurse into child frames/groups
+			if ("children" in child) {
+				cleanSvgFrame(child);
+			}
+		}
+	}
+}
+
 figma.ui.onmessage = async (msg) => {
 	if (msg.type === "apply-random-text") {
 		var sel = figma.currentPage.selection;
@@ -137,6 +187,9 @@ figma.ui.onmessage = async (msg) => {
 			// Keep as a frame — this IS the bounding box
 			svgFrame.name = iconName;
 
+			// Clean the SVG frame: remove fills and background rects
+			cleanSvgFrame(svgFrame);
+
 			// Scale to 24x24 (standard icon size)
 			var size = 24;
 			var scaleF = size / Math.max(svgFrame.width, svgFrame.height);
@@ -182,6 +235,9 @@ figma.ui.onmessage = async (msg) => {
 					continue;
 				}
 
+				// Clean the SVG frame
+				cleanSvgFrame(svgFrame);
+
 				// Move each vector child from the SVG frame into the target container
 				// Scale them to fit the target size
 				var svgW = svgFrame.width;
@@ -204,6 +260,12 @@ figma.ui.onmessage = async (msg) => {
 					child.resize(origW * scale, origH * scale);
 				}
 				svgFrame.remove();
+
+				// Clear fills on the container too
+				if ("fills" in node) {
+					node.fills = [];
+				}
+
 				applied++;
 			}
 			// Simple shapes → place icon frame on top matching size
@@ -214,6 +276,9 @@ figma.ui.onmessage = async (msg) => {
 				} catch (e) {
 					continue;
 				}
+
+				// Clean the SVG frame
+				cleanSvgFrame(svgFrame);
 
 				svgFrame.name = iconName;
 				svgFrame.fills = [];

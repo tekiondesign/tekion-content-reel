@@ -535,6 +535,13 @@
 				>
 					Lucide
 				</div>
+				<div
+					class="icon-lib-chip"
+					data-lib="streamline"
+					onclick="setIconLib('streamline')"
+				>
+					Streamline
+				</div>
 			</div>
 			<div class="search-bar">
 				<input
@@ -586,6 +593,40 @@
 				>
 			</div>
 			<!-- Lucide has no variants — bar hidden -->
+			<!-- Streamline family selector -->
+			<div class="weight-bar" id="streamline-family-bar" style="display: none">
+				<label>Family:</label>
+				<span
+					class="weight-chip active"
+					data-sf="core"
+					onclick="setStreamlineFamily('core')"
+					>Core</span
+				>
+				<span
+					class="weight-chip"
+					data-sf="sharp"
+					onclick="setStreamlineFamily('sharp')"
+					>Sharp</span
+				>
+				<span
+					class="weight-chip"
+					data-sf="flex"
+					onclick="setStreamlineFamily('flex')"
+					>Flex</span
+				>
+				<span
+					class="weight-chip"
+					data-sf="block"
+					onclick="setStreamlineFamily('block')"
+					>Block</span
+				>
+				<span
+					class="weight-chip"
+					data-sf="ultimate"
+					onclick="setStreamlineFamily('ultimate')"
+					>Ultimate</span
+				>
+			</div>
 			<div class="icon-filter-bar">
 				<span id="icon-count" class="icon-count-label">Loading…</span>
 			</div>
@@ -1073,6 +1114,8 @@
 					lib === "phosphor" ? "flex" : "none";
 				document.getElementById("remix-style-bar").style.display =
 					lib === "remix" ? "flex" : "none";
+				document.getElementById("streamline-family-bar").style.display =
+					lib === "streamline" ? "flex" : "none";
 				document.getElementById("icon-search").value = "";
 				// Ensure the lib is loaded, then search
 				if (lib === "phosphor") {
@@ -1088,6 +1131,11 @@
 				} else if (lib === "lucide") {
 					if (!lucideLoaded) {
 						loadLucideCatalog();
+						return;
+					}
+				} else if (lib === "streamline") {
+					if (!streamlineLoaded[currentStreamlineFamily]) {
+						loadStreamlineCatalog();
 						return;
 					}
 				}
@@ -1107,6 +1155,9 @@
 				} else if (currentIconLib === "lucide") {
 					count = lucideCatalog.length;
 					name = "Lucide";
+				} else if (currentIconLib === "streamline") {
+					count = streamlineCatalog.length;
+					name = "Streamline";
 				}
 				document.getElementById("icon-search").placeholder =
 					"Search " + count + "+ " + name + " icons...";
@@ -1118,6 +1169,7 @@
 					if (currentIconLib === "phosphor") onPhosphorSearch();
 					else if (currentIconLib === "remix") onRemixSearch();
 					else if (currentIconLib === "lucide") onLucideSearch();
+					else if (currentIconLib === "streamline") onStreamlineSearch();
 				}, 120);
 			}
 
@@ -1132,6 +1184,7 @@
 				if (currentIconLib === "phosphor") renderPhosphorBatch();
 				else if (currentIconLib === "remix") renderRemixBatch();
 				else if (currentIconLib === "lucide") renderLucideBatch();
+				else if (currentIconLib === "streamline") renderStreamlineBatch();
 			}
 
 			// ═══════════════════════════════════════════════════════
@@ -1139,7 +1192,7 @@
 			// ═══════════════════════════════════════════════════════
 			var CATALOG_URL =
 				"https://raw.githubusercontent.com/tekiondesign/tekion-content-reel/main/phosphor-catalog.json";
-			var SVG_CDN =
+			var PH_SVG_CDN =
 				"https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets";
 			var WEBFONT_BASE =
 				"https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src";
@@ -1244,12 +1297,14 @@
 				iconRenderIndex = end;
 			}
 			function onPhosphorClick(name) {
+				// Assets naming: /assets/<weight>/<name>-<weight>.svg
+				// For regular: /assets/regular/<name>.svg (no suffix)
 				var url;
-				if (currentWeight === "regular")
-					url = SVG_CDN + "/regular/" + name + ".svg";
-				else
+				if (currentWeight === "regular") {
+					url = PH_SVG_CDN + "/regular/" + name + ".svg";
+				} else {
 					url =
-						SVG_CDN +
+						PH_SVG_CDN +
 						"/" +
 						currentWeight +
 						"/" +
@@ -1257,8 +1312,18 @@
 						"-" +
 						currentWeight +
 						".svg";
+				}
 				fetchText(url)
 					.then(function (svgText) {
+						// Strip any <rect> with width="256" height="256" fill that acts as a background
+						svgText = svgText.replace(
+							/<rect[^>]*width="256"[^>]*height="256"[^>]*fill="none"[^>]*\/?\s*>/gi,
+							"",
+						);
+						svgText = svgText.replace(
+							/<rect[^>]*height="256"[^>]*width="256"[^>]*fill="none"[^>]*\/?\s*>/gi,
+							"",
+						);
 						postMsg({ type: "apply-icon", svg: svgText, name: name });
 					})
 					.catch(function (e) {
@@ -1578,6 +1643,165 @@
 					});
 			}
 
+			// ═══════════════════════════════════════════════════════
+			// ── STREAMLINE ICONS
+			// ═══════════════════════════════════════════════════════
+			var SL_GH_RAW =
+				"https://raw.githubusercontent.com/webalys-hq/streamline-vectors/main";
+			var SL_CATALOG_URL =
+				"https://raw.githubusercontent.com/tekiondesign/tekion-content-reel/main/streamline-catalog.json";
+			var streamlineCatalog = []; // [{n:"icon-name", p:"core/line/category/icon.svg"}, ...]
+			var streamlineLoaded = {}; // family -> true
+			var streamlineFullCatalog = null; // parsed JSON from catalog file
+			var currentStreamlineFamily = "core";
+			// Map families to their default weight
+			var SL_FAMILY_WEIGHT = {
+				core: "line",
+				sharp: "line",
+				flex: "line",
+				block: "flat",
+				ultimate: "regular",
+			};
+
+			function loadStreamlineCatalog() {
+				var fam = currentStreamlineFamily;
+				if (streamlineLoaded[fam]) return;
+				document.getElementById("icon-loading").style.display = "block";
+				document.getElementById("icon-loading-text").textContent =
+					"Loading Streamline " + fam + " icons…";
+
+				var buildFromCatalog = function (data) {
+					var weight = SL_FAMILY_WEIGHT[fam] || "line";
+					var key = fam + "/" + weight;
+					streamlineCatalog = data[key] || [];
+					// If no icons found for default weight, try _root or other keys
+					if (streamlineCatalog.length === 0) {
+						var rootKey = fam + "/_root";
+						if (data[rootKey]) streamlineCatalog = data[rootKey];
+					}
+					// Also check if any key starts with fam/
+					if (streamlineCatalog.length === 0) {
+						for (var k in data) {
+							if (k.indexOf(fam + "/") === 0 && data[k].length > 0) {
+								streamlineCatalog = data[k];
+								break;
+							}
+						}
+					}
+					streamlineLoaded[fam] = true;
+					document.getElementById("icon-loading").style.display = "none";
+					document.getElementById("icon-count").textContent =
+						streamlineCatalog.length + " icons";
+					updateSearchPlaceholder();
+					onStreamlineSearch();
+				};
+
+				if (streamlineFullCatalog) {
+					buildFromCatalog(streamlineFullCatalog);
+					return;
+				}
+
+				fetchText(SL_CATALOG_URL)
+					.then(function (text) {
+						try {
+							streamlineFullCatalog = JSON.parse(text);
+							buildFromCatalog(streamlineFullCatalog);
+						} catch (e) {
+							document.getElementById("icon-loading").style.display = "none";
+							document.getElementById("icon-list").innerHTML =
+								'<div class="empty-state">Failed to parse Streamline catalog</div>';
+						}
+					})
+					.catch(function (e) {
+						document.getElementById("icon-loading").style.display = "none";
+						document.getElementById("icon-list").innerHTML =
+							'<div class="empty-state">Streamline catalog not found.<br>Please generate and upload streamline-catalog.json<br>to your tekion-content-reel repo.</div>';
+					});
+			}
+
+			function setStreamlineFamily(fam) {
+				currentStreamlineFamily = fam;
+				document
+					.querySelectorAll("#streamline-family-bar .weight-chip")
+					.forEach(function (c) {
+						c.classList.toggle("active", c.dataset.sf === fam);
+					});
+				if (!streamlineLoaded[fam]) {
+					// Reset and reload from cached catalog
+					streamlineLoaded[fam] = false;
+					loadStreamlineCatalog();
+				} else if (streamlineFullCatalog) {
+					// Rebuild from cached catalog
+					streamlineLoaded[fam] = false;
+					loadStreamlineCatalog();
+				}
+			}
+
+			function onStreamlineSearch() {
+				var q = (document.getElementById("icon-search").value || "")
+					.toLowerCase()
+					.trim();
+				filteredIcons = q
+					? streamlineCatalog.filter(function (ic) {
+							return ic.n.includes(q);
+						})
+					: streamlineCatalog.slice();
+				document.getElementById("icon-count").textContent =
+					filteredIcons.length + " icons";
+				iconRenderIndex = 0;
+				document.getElementById("icon-list").innerHTML = "";
+				renderStreamlineBatch();
+			}
+
+			function renderStreamlineBatch() {
+				var container = document.getElementById("icon-list");
+				var end = Math.min(
+					iconRenderIndex + ICONS_PER_BATCH,
+					filteredIcons.length,
+				);
+				if (iconRenderIndex === 0 && filteredIcons.length === 0) {
+					container.innerHTML = '<div class="empty-state">No icons found</div>';
+					return;
+				}
+				var html = "";
+				for (var i = iconRenderIndex; i < end; i++) {
+					var ic = filteredIcons[i];
+					var dn = ic.n.replace(/-/g, " ");
+					// Use img preview since Streamline has no webfont
+					var previewUrl = SL_GH_RAW + "/" + ic.p;
+					html +=
+						'<div class="icon-cell" title="' +
+						dn +
+						'" onclick="onStreamlineClick(' +
+						i +
+						')"><img src="' +
+						previewUrl +
+						'" class="lucide-preview" onerror="this.style.display=\'none\'" /><span class="icon-name">' +
+						dn +
+						"</span></div>";
+				}
+				if (iconRenderIndex === 0)
+					container.innerHTML = '<div class="icon-grid">' + html + "</div>";
+				else {
+					var grid = container.querySelector(".icon-grid");
+					if (grid) grid.insertAdjacentHTML("beforeend", html);
+				}
+				iconRenderIndex = end;
+			}
+
+			function onStreamlineClick(idx) {
+				var ic = filteredIcons[idx];
+				if (!ic) return;
+				var url = SL_GH_RAW + "/" + ic.p;
+				fetchText(url)
+					.then(function (svgText) {
+						postMsg({ type: "apply-icon", svg: svgText, name: ic.n });
+					})
+					.catch(function (e) {
+						console.error("Streamline icon load failed:", ic.n, e);
+					});
+			}
+
 			// ── TAB SWITCHING ──
 			function switchTab(tab) {
 				document.querySelectorAll(".tabs > .tab").forEach(function (t) {
@@ -1601,6 +1825,10 @@
 					} else if (currentIconLib === "lucide") {
 						if (!lucideLoaded) loadLucideCatalog();
 						else onLucideSearch();
+					} else if (currentIconLib === "streamline") {
+						if (!streamlineLoaded[currentStreamlineFamily])
+							loadStreamlineCatalog();
+						else onStreamlineSearch();
 					}
 				}
 			}
